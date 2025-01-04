@@ -2,20 +2,22 @@ pico-8 cartridge // http://www.pico-8.com
 version 41
 __lua__
 
-
 -- main loop
 function _init()
 
   p1 = create_vector_2d(64, 20)
   p2 = create_vector_2d(20, 100)
-  p3 = create_vector_2d(100, 100)
+  p3 = create_vector_2d(80, 80)
 
 end
 
 function _draw()
 
   cls()
+  color(6)
   draw_triangle(p1, p2, p3, 8, nil, nil)
+  -- DEBUG
+  -- rectfill(20,20, 80,80, 6)
 
 end
 
@@ -93,7 +95,7 @@ function interpolate_coords(vector1, vector2)
     startX, endX = endX, startX
   end
 
-  local xDiff = startX - endX -- not strictly necessary, you can calculate xStep directly
+  local xDiff = endX - startX -- not strictly necessary, you can calculate xStep directly
   local yDiff = startY - endY
   local xStep = xDiff / yDiff
   
@@ -107,6 +109,7 @@ function interpolate_coords(vector1, vector2)
   for y = startY, endY, -1 do
 
     returnTable[y] = startX + (step * xStep)
+    step += 1
 
   end
 
@@ -174,6 +177,14 @@ function draw_triangle(point1, point2, point3, color1, color2, dithering)
       line2 = interpolate_coords(a, b)
       line3 = interpolate_coords(b, c)
 
+      -- DEBUG
+      print(line1.startY)
+      print(line1[line1.startY])
+      print(line1.endY)
+      print(line1[line1.endY])
+
+      print("line1: " .. line1[line1.startY] .. ", " .. line1.startY, ", " ..  line1[line1.endY] .. ", " .. line1.endY)
+
       -- one line of overdraw here but it's okay I think
       _render_triangle_part(line2, line1, color1)
       _render_triangle_part(line3, line1, color1)
@@ -187,8 +198,13 @@ end
 -- takes two interpolated lines and fills in the triangle with horizontal lines (the shorter line must be line1)
 function _render_triangle_part(line1, line2, color)
 
-  for y = line1.startY, line1.endY do
+  
+
+  for y = line1.startY, line1.endY, -1 do
+
+    -- DEBUG
     line(line1[y], y, line2[y], y, color)
+
   end
 
 end
