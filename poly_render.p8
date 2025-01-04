@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 41
+version 42
 __lua__
 
 -- main loop
@@ -15,7 +15,7 @@ function _draw()
 
   cls()
   color(6)
-  draw_triangle(p1, p2, p3, 8, nil, nil)
+  draw_triangle(p1, p2, p3, 6, nil, nil)
   -- DEBUG
   -- rectfill(20,20, 80,80, 6)
 
@@ -91,8 +91,7 @@ function interpolate_coords(vector1, vector2)
   -- safeguard for if the points are the wrong way around
   -- could be removed for performance if needed
   if startY < endY then
-    startY, endY = endY, startY
-    startX, endX = endX, startX
+    vector1, vector2 = vector2, vector1
   end
 
   local xDiff = endX - startX -- not strictly necessary, you can calculate xStep directly
@@ -103,12 +102,13 @@ function interpolate_coords(vector1, vector2)
   returnTable["startY"] = startY
   returnTable["endY"] = endY
 
-  -- I might need to round these values to integers if this doesn't work
+  -- PERFORMANCE: rounding the numbers here, hopefully not too big of a perf hit
+  -- The numbers should be rounded ONLY ONCE here and nowhere else.
 
   local step = 0
   for y = startY, endY, -1 do
 
-    returnTable[y] = startX + (step * xStep)
+    returnTable[y] = round_positive(startX + (step * xStep))
     step += 1
 
   end
@@ -177,14 +177,6 @@ function draw_triangle(point1, point2, point3, color1, color2, dithering)
       line2 = interpolate_coords(a, b)
       line3 = interpolate_coords(b, c)
 
-      -- DEBUG
-      print(line1.startY)
-      print(line1[line1.startY])
-      print(line1.endY)
-      print(line1[line1.endY])
-
-      print("line1: " .. line1[line1.startY] .. ", " .. line1.startY, ", " ..  line1[line1.endY] .. ", " .. line1.endY)
-
       -- one line of overdraw here but it's okay I think
       _render_triangle_part(line2, line1, color1)
       _render_triangle_part(line3, line1, color1)
@@ -198,11 +190,8 @@ end
 -- takes two interpolated lines and fills in the triangle with horizontal lines (the shorter line must be line1)
 function _render_triangle_part(line1, line2, color)
 
-  
-
   for y = line1.startY, line1.endY, -1 do
 
-    -- DEBUG
     line(line1[y], y, line2[y], y, color)
 
   end
@@ -212,6 +201,9 @@ end
 -->8
 -- general helper functions
 
+function round_positive(num)
+  return flr(num + 0.5)
+end
 
 
 __gfx__
