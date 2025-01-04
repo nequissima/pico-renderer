@@ -1,13 +1,21 @@
 pico-8 cartridge // http://www.pico-8.com
 version 41
 __lua__
--- main loop
 
+
+-- main loop
 function _init()
+
+  p1 = create_vector_2d(64, 20)
+  p2 = create_vector_2d(20, 100)
+  p3 = create_vector_2d(100, 100)
 
 end
 
 function _draw()
+
+  cls()
+  draw_triangle(p1, p2, p3, 8, nil, nil)
 
 end
 
@@ -74,10 +82,18 @@ function interpolate_coords(vector1, vector2)
 
   local startY = vector1.y
   local endY = vector2.y
+
   local startX = vector1.x
   local endX = vector2.x
 
-  local xDiff = startX - endX
+  -- safeguard for if the points are the wrong way around
+  -- could be removed for performance if needed
+  if startY < endY then
+    startY, endY = endY, startY
+    startX, endX = endX, startX
+  end
+
+  local xDiff = startX - endX -- not strictly necessary, you can calculate xStep directly
   local yDiff = startY - endY
   local xStep = xDiff / yDiff
   
@@ -102,7 +118,7 @@ end
 -- graphics & drawing functions
 
 -- draws triangle defined by three points on the screen
-function draw_triangle(point1, point2, point3)
+function draw_triangle(point1, point2, point3, color1, color2, dithering)
 
   local a = point1
   local b = point2
@@ -115,31 +131,66 @@ function draw_triangle(point1, point2, point3)
   if (b.y < c.y) then b,c = c,b end
   if (a.y < b.y) then a,b = b,a end
 
-  -- test for the possible cases
+  -- variables for the interpolation tables
+  local line1
+  local line2
+  local line3
 
+  -- test for the possible cases
   if (a.y == b.y) then
 
     if (b.y == c.y) then
       -- all points are on a horizontal line
+      local minX = min(min(a.x, b.x), c.x)
+      local maxX = max(max(a.x, b.x), c.x)
 
+      line(minX, a.y, maxX, a.y)
+      
     else
       -- a and b are on a horizontal line
+
+      line1 = interpolate_coords(a, c)
+      line2 = interpolate_coords(b, c)
+
+      _render_triangle_part(line1, line2, color1)
 
     end
 
   else
 
     if (b.y == c.y) then
-      -- b and y are on a horizontal line
+      -- b and c are on a horizontal line
+
+      line1 = interpolate_coords(a, b)
+      line2 = interpolate_coords(a, c)
+
+      _render_triangle_part(line1, line2, color1)
 
     else
       -- none of the points have the same height
 
-    end
+      -- interpolate the lines between points
+      line1 = interpolate_coords(a, c)
+      line2 = interpolate_coords(a, b)
+      line3 = interpolate_coords(b, c)
 
+      -- one line of overdraw here but it's okay I think
+      _render_triangle_part(line2, line1, color1)
+      _render_triangle_part(line3, line1, color1)
+
+    end
 
   end
   
+end
+
+-- takes two interpolated lines and fills in the triangle with horizontal lines (the shorter line must be line1)
+function _render_triangle_part(line1, line2, color)
+
+  for y = line1.startY, line1.endY do
+    line(line1[y], y, line2[y], y, color)
+  end
+
 end
 
 -->8
