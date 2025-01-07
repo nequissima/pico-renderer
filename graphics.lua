@@ -110,6 +110,7 @@ function polygon_to_relative(polygon)
 
   return {[1] = _3d_vector_to_screenspace(polygon[1]),
           [2] = _3d_vector_to_screenspace(polygon[2]),
+          [3] = _3d_vector_to_screenspace(polygon[3]),
           ["normal"] = polygon.normal}
 
 end
@@ -119,4 +120,11 @@ function create_an_object(polygonList, centrePoint)
 
   return {["polyList"] = polygonList, ["centrePoint"] = centrePoint}
 
+end
+
+
+function clone_object(object)
+
+
+  
 end
