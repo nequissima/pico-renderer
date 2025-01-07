@@ -67,6 +67,7 @@ function draw_triangle(point1, point2, point3, color1, color2, dithering)
   
 end
 
+
 -- takes two interpolated lines and fills in the triangle with horizontal lines (the shorter line must be line1)
 function _render_triangle_part(line1, line2, color)
 
@@ -75,5 +76,15 @@ function _render_triangle_part(line1, line2, color)
     line(line1[y], y, line2[y], y, color)
 
   end
+
+end
+
+
+function create_polygon(vector1, vector2, vector3)
+
+  return {[1] = vector1,
+          [2] = vector2,
+          [3] = vector3,
+          ["normal"] = calculate_surface_normal(vector1, vector2, vector3)}
 
 end

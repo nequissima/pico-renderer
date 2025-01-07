@@ -8,6 +8,7 @@ function create_vector_2d(xCoord, yCoord)
 
 end
 
+
 -- creates a 3d-vector from 3 coordinates
 function create_vector_3d(xCoord, yCoord, zCoord)
 
@@ -17,6 +18,7 @@ function create_vector_3d(xCoord, yCoord, zCoord)
 
 end
 
+
 -- takes a 2d-vector and returns a clone
 function clone_2d_vector(inputVector)
 
@@ -24,12 +26,14 @@ function clone_2d_vector(inputVector)
 
 end
 
+
 -- takes a 3d-vector and returns a clone
 function clone_3d_vector(inputVector)
 
   return create_vector_3d(inputVector.x, inputVector.y, inputVector.z)
 
 end
+
 
 -- takes two points and returns a table with y,x(!!) pairs for each y value between(inclusive) the two points
 function interpolate_coords(vector1, vector2)
@@ -66,18 +70,71 @@ function interpolate_coords(vector1, vector2)
   
 end
 
+
 -- takes a 3d vector and returns its position in relative screenspace coordinates (-1 to 1)
-function _3d_vector_to_relative(vector)
+function _3d_vector_to_screenspace(vector)
 
   -- this function assumes a horizontal and vertical FOV of 90.
   -- for other values you have to squish the values, which is probably more efficient to do all at once earlier than this func.
 
-  local newX, newY
+  -- the function assumes that the camera is at 0,0,0 and it is pointing in the direction of the positive z-axis
+  -- local and global rotation must be done before calling this function
 
-  newX = vector.x / vector.z
-  newY = vector.y / vector.z
+  -- this vector returns screenspace coordinates that are off the screen, offscreen polys have to be culled later.
+
+  return create_vector_2d(vector.x / vector.z, vector.y / vector.z)
 
 end
+
+
+-- takes two 3d vectors and adds them together
+function add_vectors(vector1, vector2)
+
+  return create_vector_3d(vector1.x + vector2.x,
+                          vector1.y + vector2.y,
+                          vector1.z + vector2.z)
+
+end
+
+
+-- takes two 3d vectors and subtracts the second from the first
+function sub_vectors(vector1, vector2)
+
+  return create_vector_3d(vector1.x - vector2.x,
+                          vector1.y - vector2.y,
+                          vector1.z - vector2.z)
+
+end
+
+
+-- calculates the cross product between two vectors
+function cross_product_3d(vector1, vector2)
+
+  return create_vector_3d(vector1.y * vector2.z - vector1.z * vector2.y,
+                          vector1.z * vector2.x - vector1.x * vector2.z,
+                          vector1.x * vector2.y - vector1.y * vector2.x)
+
+end
+
+
+-- takes a polygon and calculates the normalized surface normal vector for it.
+-- the cross calculation is done with the vectors ab and ac.
+function calculate_surface_normal(vector1, vector2, vector3)
+
+  return  normalize_3d_vector(sub_vectors(vector2, vector1), sub_vectors(vector3, vector1))
+
+end
+
+
+-- takes a 3d vector and normalizes it
+-- this is slow. big PERFORMANCE gains to be found by optimizing this. (maybe use the Quake 3 fast inverse sqrt?) 
+function normalize_3d_vector(vector)
+
+  local factor = 1 / sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z)
+  return create_vector_3d(vector.x / factor, vector.y / factor, vector.z / factor)
+
+end
+
 
 function polygon_to_relative()
 
