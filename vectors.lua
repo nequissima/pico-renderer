@@ -1,6 +1,6 @@
 -- vectors and vector functions
 
--- creates a 2d-vector from 2 co-ordinates
+-- creates a 2d-vector from 2 coordinates
 function create_vector_2d(xCoord, yCoord)
 
   return {["x"] = xCoord,
@@ -8,7 +8,7 @@ function create_vector_2d(xCoord, yCoord)
 
 end
 
--- creates a 3d-vector from 3 co-ordinates
+-- creates a 3d-vector from 3 coordinates
 function create_vector_3d(xCoord, yCoord, zCoord)
 
   return {["x"] = xCoord,
@@ -66,3 +66,19 @@ function interpolate_coords(vector1, vector2)
   
 end
 
+-- takes a 3d vector and returns its position in relative screenspace coordinates (-1 to 1)
+function _3d_vector_to_relative(vector)
+
+  -- this function assumes a horizontal and vertical FOV of 90.
+  -- for other values you have to squish the values, which is probably more efficient to do all at once earlier than this func.
+
+  local newX, newY
+
+  newX = vector.x / vector.z
+  newY = vector.y / vector.z
+
+end
+
+function polygon_to_relative()
+
+end
