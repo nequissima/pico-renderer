@@ -80,11 +80,43 @@ function _render_triangle_part(line1, line2, color)
 end
 
 
-function create_polygon(vector1, vector2, vector3)
+-- takes three points and returns a polygon. it is assumed that the order of the polygons is counter-clockwise when looking
+-- in the direction opposite the normal vector
+function create_3d_polygon(vector1, vector2, vector3)
 
   return {[1] = vector1,
           [2] = vector2,
           [3] = vector3,
           ["normal"] = calculate_surface_normal(vector1, vector2, vector3)}
+
+end
+
+
+-- clones a polygon
+function clone_3d_polygon(polygon)
+
+  return {[1] = polygon[1],
+          [2] = polygon[2],
+          [3] = polygon[3],
+          ["normal"] = polygon.normal}
+
+end
+
+
+-- takes a polygon and changes it to relative screenspace co-ordinates.
+-- returns a 2d-polygon
+-- NOTE: the normal vector is still in 3d space because it is needed for the shader function
+function polygon_to_relative(polygon)
+
+  return {[1] = _3d_vector_to_screenspace(polygon[1]),
+          [2] = _3d_vector_to_screenspace(polygon[2]),
+          ["normal"] = polygon.normal}
+
+end
+
+
+function create_an_object(polygonList, centrePoint)
+
+  return {["polyList"] = polygonList, ["centrePoint"] = centrePoint}
 
 end

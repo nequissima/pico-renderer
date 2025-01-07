@@ -1,5 +1,9 @@
 -- vectors and vector functions
 
+-- making sin and cos behave like you expect them to
+p8cos = cos function cos(angle) return p8cos(angle/(3.1415*2)) end
+p8sin = sin function sin(angle) return -p8sin(angle/(3.1415*2)) end
+
 -- creates a 2d-vector from 2 coordinates
 function create_vector_2d(xCoord, yCoord)
 
@@ -136,6 +140,32 @@ function normalize_3d_vector(vector)
 end
 
 
-function polygon_to_relative()
+-- multiplies a 3d vector with a matrix
+-- modifies the original vector!!!
+function multiply_matrix_vector_3d(matrix, vector)
+
+  vector.x = vector.x * matrix[1][1] + vector.y * matrix[1][2] + vector.z * matrix[1][3]
+  vector.y = vector.x * matrix[2][1] + vector.y * matrix[2][2] + vector.z * matrix[2][3]
+  vector.z = vector.x * matrix[3][1] + vector.y * matrix[3][2] + vector.z * matrix[3][3]
+
+end
+
+
+-- rotation counter-clockwise looking down assuming +y is up
+function create_rotation_matrix_y(angle)
+
+  return {{cos(angle), 0, -sin(angle)},
+          {0,          1, 0},
+          {sin(angle), 0, cos(angle)}}
+
+end
+
+
+-- rotation counter-clockwise looking down assuming +x is up
+function create_rotation_matrix_x(angle)
+
+  return {{1, 0,           0},
+          {0, cos(angle),  sin(angle)},
+          {0, -sin(angle), cos(angle)}}
 
 end
