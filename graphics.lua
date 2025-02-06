@@ -116,9 +116,20 @@ function polygon_to_relative(polygon)
 end
 
 
+-- creates an object from a polygon list and a 3d vector as a centre point
+-- returns an object
 function create_an_object(polygonList, centrePoint)
 
   return {["polyList"] = polygonList, ["centrePoint"] = centrePoint}
+
+end
+
+
+-- renders a polygon on the screen
+-- assumes that the polygon has been converted to 2d
+function render_polygon(polygon)
+
+
 
 end
 

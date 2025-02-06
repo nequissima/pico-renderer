@@ -144,9 +144,11 @@ end
 -- modifies the original vector!!!
 function multiply_matrix_vector_3d(matrix, vector)
 
-  vector.x = vector.x * matrix[1][1] + vector.y * matrix[1][2] + vector.z * matrix[1][3]
-  vector.y = vector.x * matrix[2][1] + vector.y * matrix[2][2] + vector.z * matrix[2][3]
-  vector.z = vector.x * matrix[3][1] + vector.y * matrix[3][2] + vector.z * matrix[3][3]
+  return create_vector_3d(
+    vector.x * matrix[1][1] + vector.y * matrix[1][2] + vector.z * matrix[1][3],
+    vector.x * matrix[2][1] + vector.y * matrix[2][2] + vector.z * matrix[2][3],
+    vector.x * matrix[3][1] + vector.y * matrix[3][2] + vector.z * matrix[3][3]
+  )
 
 end
 
