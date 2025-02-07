@@ -127,9 +127,9 @@ end
 
 -- renders a polygon on the screen
 -- assumes that the polygon has been converted to 2d
-function render_polygon(polygon)
+function render_polygon(polygon, shader)
 
-
+  draw_triangle(polygon[1], polygon[2], polygon[3], color1, color2, dithering)
 
 end
 

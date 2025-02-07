@@ -13,13 +13,22 @@ function _init()
   p2 = create_vector_2d(20, 100)
   p3 = create_vector_2d(80, 80)
 
+  poly = {p1, p2, p3}
+
+  p4 = create_vector_3d(0, 1, 3)
+  p5 = create_vector_3d(1, -1, 3)
+  p6 = create_vector_3d(-1, -1, 3)
+
+  poly2 = polygon_to_relative(create_3d_polygon(p4, p5, p6))
+
+
 end
 
 function _draw()
 
   cls()
   color(6)
-  draw_triangle(p1, p2, p3, 6, nil, nil)
+  render_polygon(poly2, nil)
   -- DEBUG
   -- rectfill(20,20, 80,80, 6)
 

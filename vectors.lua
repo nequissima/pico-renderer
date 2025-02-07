@@ -86,7 +86,7 @@ function _3d_vector_to_screenspace(vector)
 
   -- this vector returns screenspace coordinates that are off the screen, offscreen polys have to be culled later.
 
-  return create_vector_2d(vector.x / vector.z, vector.y / vector.z)
+  return create_vector_2d(64 + (-vector.x * 64 / vector.z), 64 + (-vector.y * 64 / vector.z))
 
 end
 
