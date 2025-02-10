@@ -135,6 +135,13 @@ function render_polygon(polygon, shader)
 end
 
 
+-- takes a list of polygons and returns a sorted list
+function sort_polygons(list)
+
+end
+
+
+-- returns a clone of the target object
 function clone_object(object)
 
 
