@@ -135,11 +135,61 @@ function render_polygon(polygon, shader)
 end
 
 
--- takes a list of polygons and returns a sorted list
-function sort_polygons(list)
+-- takes a polygon and returns an approximate center point for it
+function cpoint_approx(polygon)
+
+  return create_vector_3d((polygon[1].x + polygon[2].x + polygon[3].x) / 3,
+                          (polygon[1].y + polygon[2].y + polygon[3].y) / 3,
+                          (polygon[1].z + polygon[2].z + polygon[3].z) / 3)
 
 end
 
+-- assumes that no polygons centrepoints lie exactly on the origin, otherwise this will crash
+-- takes a list of polygons and returns a sorted list
+function sort_polygons(list)
+
+  local tablelength = #list
+  local biggest = 0
+  local biggestindex = 0
+  local dist = 0
+  local newtable = {}
+  local newtableindex = 1
+
+  for j=1,tablelength do
+
+    for i=1,tablelength do
+
+      if list[i] != nil do
+
+        dist = dist_3d(origin, cpoint_approx(list[i]))
+        if dist > biggest do
+
+          biggest = dist
+          biggestindex = i
+
+        end
+
+      end
+
+    end
+
+    newtable[newtableindex] = list[i]
+    list[i] = nil
+    biggest = 0
+    newtableindex += 1
+
+  end
+
+  return newtable
+
+end
+
+
+-- takes an object and renders it on the screen
+function render_object(object)
+
+
+end
 
 -- returns a clone of the target object
 function clone_object(object)

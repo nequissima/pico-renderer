@@ -6,6 +6,8 @@ __lua__
 #include graphics.lua
 #include helper_funcs.lua
 
+origin = {["x"] = 0, ["y"] = 0, ["z"] = 0}
+
 -- main loop
 function _init()
 
@@ -21,6 +23,8 @@ function _init()
 
   poly2 = polygon_to_relative(create_3d_polygon(p4, p5, p6))
 
+  testtable = {1, 3, 5, 6}
+
 
 end
 
@@ -31,6 +35,7 @@ function _draw()
   render_polygon(poly2, nil)
   -- DEBUG
   -- rectfill(20,20, 80,80, 6)
+  print(tostr(#testtable))
 
 end
 
