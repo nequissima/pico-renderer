@@ -129,7 +129,8 @@ end
 -- assumes that the polygon has been converted to 2d
 function render_polygon(polygon, shader)
 
-  draw_triangle(polygon[1], polygon[2], polygon[3], color1, color2, dithering)
+  -- placeholder, the render func should change the color settings
+  draw_triangle(polygon[1], polygon[2], polygon[3], 6, nil, nil)
 
 end
 
