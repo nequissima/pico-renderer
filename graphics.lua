@@ -1,7 +1,7 @@
 -- graphics & drawing functions
 
 -- draws triangle defined by three points on the screen
-function draw_triangle(point1, point2, point3, color1, color2, dithering)
+function draw_triangle(point1, point2, point3)
 
   -- PERFORMANCE: to save tokens you can remove this and rename the abc to the points
   local a, b, c = point1, point2, point3
@@ -35,7 +35,7 @@ function draw_triangle(point1, point2, point3, color1, color2, dithering)
       line1 = interpolate_coords(a, c)
       line2 = interpolate_coords(b, c)
 
-      _render_triangle_part(line1, line2, color1)
+      _render_triangle_part(line1, line2)
 
     end
 
@@ -47,7 +47,7 @@ function draw_triangle(point1, point2, point3, color1, color2, dithering)
       line1 = interpolate_coords(a, b)
       line2 = interpolate_coords(a, c)
 
-      _render_triangle_part(line1, line2, color1)
+      _render_triangle_part(line1, line2)
 
     else
       -- none of the points have the same height
@@ -58,8 +58,8 @@ function draw_triangle(point1, point2, point3, color1, color2, dithering)
       line3 = interpolate_coords(b, c)
 
       -- one line of overdraw here but it's okay I think
-      _render_triangle_part(line2, line1, color1)
-      _render_triangle_part(line3, line1, color1)
+      _render_triangle_part(line2, line1)
+      _render_triangle_part(line3, line1)
 
     end
 
@@ -69,11 +69,11 @@ end
 
 
 -- takes two interpolated lines and fills in the triangle with horizontal lines (the shorter line must be line1)
-function _render_triangle_part(line1, line2, color)
+function _render_triangle_part(line1, line2)
 
   for y = line1.startY, line1.endY, -1 do
 
-    line(line1[y], y, line2[y], y, color)
+    line(line1[y], y, line2[y], y)
 
   end
 
@@ -118,7 +118,7 @@ end
 
 -- creates an object from a polygon list and a 3d vector as a centre point
 -- returns an object
-function create_an_object(polygonList, centrePoint)
+function create_object(polygonList, centrePoint)
 
   return {["polyList"] = polygonList, ["centrePoint"] = centrePoint}
 
@@ -129,8 +129,9 @@ end
 -- assumes that the polygon has been converted to 2d
 function render_polygon(polygon, shader)
 
+  color(6)
   -- placeholder, the render func should change the color settings
-  draw_triangle(polygon[1], polygon[2], polygon[3], 6, nil, nil)
+  draw_triangle(polygon[1], polygon[2], polygon[3])
 
 end
 
@@ -146,6 +147,7 @@ end
 
 -- assumes that no polygons centrepoints lie exactly on the origin, otherwise this will crash
 -- takes a list of polygons and returns a sorted list
+-- assumes camera is at origin
 function sort_polygons(list)
 
   local tablelength = #list
@@ -173,8 +175,8 @@ function sort_polygons(list)
 
     end
 
-    newtable[newtableindex] = list[i]
-    list[i] = nil
+    newtable[newtableindex] = list[biggestindex]
+    list[biggestindex] = nil
     biggest = 0
     newtableindex += 1
 
@@ -185,13 +187,49 @@ function sort_polygons(list)
 end
 
 
--- takes an object and renders it on the screen
-function render_object(object)
+-- takes a polygon and applies a rotation matrix
+-- does NOT return a new polygon
+function rotate_polygon(polygon, rotMat)
 
+  polygon[1] = multiply_matrix_vector_3d(rotMat, polygon[1])
+  polygon[2] = multiply_matrix_vector_3d(rotMat, polygon[2])
+  polygon[3] = multiply_matrix_vector_3d(rotMat, polygon[3])
+  polygon["normal"] = multiply_matrix_vector_3d(rotMat, polygon["normal"])
+
+end
+
+function translate_polygon(polygon, vector)
+
+  polygon[1] = add_vectors(polygon[1], vector)
+  polygon[2] = add_vectors(polygon[2], vector)
+  polygon[3] = add_vectors(polygon[3], vector)
+
+end
+
+
+-- takes an object and renders it on the screen
+-- assumes centre point of object is at 0,0,0 and rotates it then translates it
+function render_object(object, objectRot, objectTrans)
+
+  local newlist = {}
+
+  for i, v in ipairs(object.polyList) do
+    --rotate_polygon(v, objectRot)
+    --translate_polygon(v, objectTrans)
+    newlist[i] = v
+  end
+
+  newlist = sort_polygons(newlist)
+
+  --for i, v in ipairs(newlist) do
+  for i, v in ipairs(object.polyList) do
+    render_polygon(polygon_to_relative(v), nil)
+  end
 
 end
 
 -- returns a clone of the target object
+-- don't know if I need this
 function clone_object(object)
 
 
