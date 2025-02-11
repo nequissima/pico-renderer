@@ -47,14 +47,14 @@ function interpolate_coords(vector1, vector2)
     vector1, vector2 = vector2, vector1
   end
   
-  local startY = vector1.y
-  local endY   = vector2.y
+  local startY = round_positive(vector1.y)
+  local endY   = round_positive(vector2.y)
 
   local startX = vector1.x
   local endX   = vector2.x
 
   local xDiff  = endX - startX -- not strictly necessary, you can calculate xStep directly
-  local yDiff  = startY - endY
+  local yDiff  = startY - endY -- should always be positive
   local xStep  = xDiff / yDiff
   
   local returnTable = {["startY"] = startY,
@@ -86,7 +86,7 @@ function _3d_vector_to_screenspace(vector)
 
   -- this vector returns screenspace coordinates that are off the screen, offscreen polys have to be culled later.
 
-  return create_vector_2d(64 + (-vector.x * 64 / vector.z), 64 + (-vector.y * 64 / vector.z))
+  return create_vector_2d(64 + (vector.x * 64 / vector.z), 64 + (-vector.y * 64 / vector.z))
 
 end
 

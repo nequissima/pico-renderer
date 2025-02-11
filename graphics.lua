@@ -211,26 +211,59 @@ end
 -- assumes centre point of object is at 0,0,0 and rotates it then translates it
 function render_object(object, objectRot, objectTrans)
 
-  local newlist = {}
+  local newlist = clone_polylist(object.polyList)
 
-  for i, v in ipairs(object.polyList) do
-    --rotate_polygon(v, objectRot)
-    --translate_polygon(v, objectTrans)
+  for i, v in ipairs(newlist) do
+    rotate_polygon(v, objectRot)
+    translate_polygon(v, objectTrans)
     newlist[i] = v
   end
 
   newlist = sort_polygons(newlist)
 
+  
   for i, v in ipairs(newlist) do
     render_polygon(polygon_to_relative(v), nil)
+
+    if (loggingdone == false) do
+    -- DEBUG
+      printh(tostr(v[1].x), "log.txt")
+      printh(tostr(v[1].y), "log.txt")
+      printh(tostr(v[1].z), "log.txt")
+
+      printh(tostr(v[2].x), "log.txt")
+      printh(tostr(v[2].y), "log.txt")
+      printh(tostr(v[2].z), "log.txt")
+
+      printh(tostr(v[2].x), "log.txt")
+      printh(tostr(v[2].y), "log.txt")
+      printh(tostr(v[2].z), "log.txt")
+
+      printh(" ", "log.txt")
+    -- DEBUG
+    end
+
   end
+
+  loggingdone = true -- DEBUG
 
 end
 
 -- returns a clone of the target object
 -- don't know if I need this
-function clone_object(object)
+function clone_polylist(polylist)
 
+  local newlist = {}
 
+  for i,v in ipairs(polylist) do
+    newlist[i] = {
+      create_vector_3d(v[1].x, v[1].y, v[1].z),
+      create_vector_3d(v[2].x, v[2].y, v[2].z),
+      create_vector_3d(v[3].x, v[3].y, v[3].z),
+      ["normal"] = create_vector_3d(v["normal"].x, v["normal"].y, v["normal"].z),
+    }
+  end
+
+  return newlist
   
 end

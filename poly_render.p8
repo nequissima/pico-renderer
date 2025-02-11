@@ -5,15 +5,16 @@ __lua__
 #include vectors.lua
 #include graphics.lua
 #include helper_funcs.lua
+#include objects.lua
+
+loggingdone = false
 
 origin = {["x"] = 0, ["y"] = 0, ["z"] = 0}
 
 -- main loop
 function _init()
 
-  cpoint = create_vector_3d(0, 0, 0)
-
-  rotmat = create_rotation_matrix_x(0)
+  --[[
 
   p1 = create_vector_3d(0, 1, 3)
   p2 = create_vector_3d(1, -1, 3)
@@ -34,30 +35,31 @@ function _init()
   print(tostr(poly1[2]))
   print(tostr(poly1[3]))
 
+  ]]
+
+  rot = 0
+  rotd = 0.05
+
+  translation = create_vector_3d(0,0,3)
+  rotmat = create_rotation_matrix_y(rot)
+
+  obj = create_cube()
+  
+
 end
 
 function _draw()
 
   cls()
   color(6)
-  render_object(obj, rotmat, cpoint)
-  color(4)
-  print(tostr(relative[1].x))
-  print(tostr(relative[1].y))
-  --print(tostr(relative[1].z))
-  print(tostr(relative[2].x))
-  print(tostr(relative[2].y))
-  --print(tostr(relative[2].z))
-  print(tostr(relative[3].x))
-  print(tostr(relative[3].y))
-  --print(tostr(relative[3].z))
-  line(64, 43, 43, 85)
-  line(43, 85, 51, 51)
-  line(51, 51, 64, 43)
+  render_object(obj, rotmat, translation)
 
 end
 
 function _update()
+
+  rotmat = create_rotation_matrix_y(rot)
+  rot = rot + rotd
 
 end
 
