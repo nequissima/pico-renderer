@@ -125,7 +125,7 @@ end
 -- the cross calculation is done with the vectors ab and ac.
 function calculate_surface_normal(vector1, vector2, vector3)
 
-  return  normalize_3d_vector(sub_vectors(vector2, vector1), sub_vectors(vector3, vector1))
+  return  normalize_3d_vector(cross_product_3d(sub_vectors(vector2, vector1), sub_vectors(vector3, vector1)))
 
 end
 
@@ -152,7 +152,6 @@ function multiply_matrix_vector_3d(matrix, vector)
 
 end
 
-
 -- rotation counter-clockwise looking down assuming +y is up
 function create_rotation_matrix_y(angle)
 
@@ -171,3 +170,5 @@ function create_rotation_matrix_x(angle)
           {0, -sin(angle), cos(angle)}}
 
 end
+
+-- TODO create matrix - matrix multiplication function it will be more efficient.

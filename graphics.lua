@@ -125,11 +125,30 @@ function create_object(polygonList, centrePoint)
 end
 
 
+-- selects the color based on the Y value of the normal vector
+function shader1(normal)
+
+  local y = normal.y
+  if (y > 0.8) then
+    color(1)
+  elseif (y > 0.6) then
+    color(2)
+  elseif (y > -0.6) then
+    color(3)
+  elseif (y > -0.8) then
+    color(4)
+  else
+    color(5)
+  end
+
+end
+
+
 -- renders a polygon on the screen
 -- assumes that the polygon has been converted to 2d
 function render_polygon(polygon, shader)
 
-  color(6)
+  shader1(polygon.normal)
   -- placeholder, the render func should change the color settings
   draw_triangle(polygon[1], polygon[2], polygon[3])
 
@@ -209,12 +228,13 @@ end
 
 -- takes an object and renders it on the screen
 -- assumes centre point of object is at 0,0,0 and rotates it then translates it
-function render_object(object, objectRot, objectTrans)
+function render_object(object, objectRotH, objectRotV, objectTrans)
 
   local newlist = clone_polylist(object.polyList)
 
   for i, v in ipairs(newlist) do
-    rotate_polygon(v, objectRot)
+    rotate_polygon(v, objectRotV)
+    rotate_polygon(v, objectRotH)
     translate_polygon(v, objectTrans)
     newlist[i] = v
   end
