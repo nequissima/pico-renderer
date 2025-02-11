@@ -51,6 +51,9 @@ function _draw()
   print(tostr(relative[3].x))
   print(tostr(relative[3].y))
   --print(tostr(relative[3].z))
+  line(64, 43, 43, 85)
+  line(43, 85, 51, 51)
+  line(51, 51, 64, 43)
 
 end
 

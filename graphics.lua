@@ -221,8 +221,7 @@ function render_object(object, objectRot, objectTrans)
 
   newlist = sort_polygons(newlist)
 
-  --for i, v in ipairs(newlist) do
-  for i, v in ipairs(object.polyList) do
+  for i, v in ipairs(newlist) do
     render_polygon(polygon_to_relative(v), nil)
   end
 
