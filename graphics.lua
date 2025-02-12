@@ -130,12 +130,17 @@ end
 -- selects the color based on the Y value of the normal vector
 function shader1(normal)
 
-  local y = normal.y
+  local absY = abs(normal.y)
+  local absX = abs(normal.x)
+  local absZ = abs(normal.z)
 
-  if (y > 0) then
-    color(1)
+  nmax = max(max(absX, absY), absZ)
+  if nmax == absX then
+    color(8)
+  elseif(nmax == absY) then
+    color(11)
   else
-    color(5)
+    color(12)
   end
 
 end
