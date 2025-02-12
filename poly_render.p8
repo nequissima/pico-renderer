@@ -7,8 +7,7 @@ __lua__
 #include helper_funcs.lua
 #include objects.lua
 
-loggingdone = true
-
+cameradir = {["x"] = 0, ["y"] = 0, ["z"] = 1}
 origin = {["x"] = 0, ["y"] = 0, ["z"] = 0}
 
 -- main loop
@@ -22,6 +21,10 @@ function _init()
   translation = create_vector_3d(0,0,3)
   hrotmat = create_rotation_matrix_y(hrot)
   vrotmat = create_rotation_matrix_x(vrot)
+
+  xdir = create_vector_3d(1,0,0)
+  ydir = create_vector_3d(0,1,0)
+  cross = cross_product_3d(xdir, ydir) --should be (0,0,1)
 
   obj = create_cube()
 
@@ -37,6 +40,7 @@ function _draw()
 
   cls()
   render_object(obj, hrotmat, vrotmat, translation)
+  
 
 end
 

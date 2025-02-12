@@ -120,6 +120,11 @@ function cross_product_3d(vector1, vector2)
 
 end
 
+-- returns the dot product of two vectors
+function dot_product_3d(vector1, vector2)
+  return (vector1.x * vector2.x) + (vector1.y * vector2.y) + (vector1.z * vector2.z)
+end
+
 
 -- takes a polygon and calculates the normalized surface normal vector for it.
 -- the cross calculation is done with the vectors ab and ac.
@@ -135,7 +140,7 @@ end
 function normalize_3d_vector(vector)
 
   local factor = 1 / sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z)
-  return create_vector_3d(vector.x / factor, vector.y / factor, vector.z / factor)
+  return create_vector_3d(vector.x * factor, vector.y * factor, vector.z * factor)
 
 end
 

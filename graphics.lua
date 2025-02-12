@@ -93,12 +93,14 @@ end
 
 
 -- clones a polygon
-function clone_3d_polygon(polygon)
+function clone_3d_polygon(v)
 
-  return {[1] = polygon[1],
-          [2] = polygon[2],
-          [3] = polygon[3],
-          ["normal"] = polygon.normal}
+  return {
+    create_vector_3d(v[1].x, v[1].y, v[1].z),
+    create_vector_3d(v[2].x, v[2].y, v[2].z),
+    create_vector_3d(v[3].x, v[3].y, v[3].z),
+    ["normal"] = create_vector_3d(v["normal"].x, v["normal"].y, v["normal"].z),
+  }
 
 end
 
@@ -129,14 +131,9 @@ end
 function shader1(normal)
 
   local y = normal.y
-  if (y > 0.8) then
+
+  if (y > 0) then
     color(1)
-  elseif (y > 0.6) then
-    color(2)
-  elseif (y > -0.6) then
-    color(3)
-  elseif (y > -0.8) then
-    color(4)
   else
     color(5)
   end
@@ -230,42 +227,30 @@ end
 -- assumes centre point of object is at 0,0,0 and rotates it then translates it
 function render_object(object, objectRotH, objectRotV, objectTrans)
 
-  local newlist = clone_polylist(object.polyList)
+  local newlist = {}
+  local temppoly
+  local newlistindex = 1
 
-  for i, v in ipairs(newlist) do
-    rotate_polygon(v, objectRotV)
-    rotate_polygon(v, objectRotH)
-    translate_polygon(v, objectTrans)
-    newlist[i] = v
+  for i, v in ipairs(object.polyList) do
+    temppoly = clone_3d_polygon(v)
+    rotate_polygon(temppoly, objectRotV)
+    rotate_polygon(temppoly, objectRotH)
+    translate_polygon(temppoly, objectTrans)
+    -- realistically we should caluclate the cpoint approx when we create a poly and then rotate it
+    -- i'd have to refactor a lot of shit for that though :(
+    if (dot_product_3d(cpoint_approx(temppoly), temppoly.normal) < 0) then
+      newlist[newlistindex] = temppoly
+      newlistindex += 1
+    end
+    
   end
 
   newlist = sort_polygons(newlist)
 
-  
   for i, v in ipairs(newlist) do
     render_polygon(polygon_to_relative(v), nil)
-
-    if (loggingdone == false) do
-    -- DEBUG
-      printh(tostr(v[1].x), "log.txt")
-      printh(tostr(v[1].y), "log.txt")
-      printh(tostr(v[1].z), "log.txt")
-
-      printh(tostr(v[2].x), "log.txt")
-      printh(tostr(v[2].y), "log.txt")
-      printh(tostr(v[2].z), "log.txt")
-
-      printh(tostr(v[2].x), "log.txt")
-      printh(tostr(v[2].y), "log.txt")
-      printh(tostr(v[2].z), "log.txt")
-
-      printh(" ", "log.txt")
-    -- DEBUG
-    end
-
+    print(tostr(v.normal.x) .. ", " .. tostr(v.normal.y) .. ", " .. tostr(v.normal.z))
   end
-
-  loggingdone = true -- DEBUG
 
 end
 
