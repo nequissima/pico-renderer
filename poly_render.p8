@@ -13,26 +13,29 @@ origin = {["x"] = 0, ["y"] = 0, ["z"] = 0}
 -- main loop
 function _init()
 
+  -- yes i'm aware horizontal and vertical are not the right terms to use here but
+  -- you get what i mean here
+
+  -- horizontal rotation and the update increment
   hrot = 0
   hrotd = 0.025
+
+  -- vertical rotation and the update increment
   vrot = 0
   vrotd = 0.01
 
-  translation = create_vector_3d(0,0,3)
+  -- translation vector
+  translation = create_vector_3d(0,0,15)
+
+  -- horizontal rotation matrix
   hrotmat = create_rotation_matrix_y(hrot)
+
+  -- vertical rotation matrix
   vrotmat = create_rotation_matrix_x(vrot)
 
-  xdir = create_vector_3d(1,0,0)
-  ydir = create_vector_3d(0,1,0)
-  cross = cross_product_3d(xdir, ydir) --should be (0,0,1)
+  obj = create_icosahedron()
 
-  obj = create_cube()
-
-  pal(1, 14, 1)
-  pal(2, 8, 1)
-  pal(3, -8, 1)
-  pal(4, 2, 1)
-  pal(5, -14, 1)
+  redpalette()
 
 end
 
@@ -41,7 +44,6 @@ function _draw()
   cls()
   render_object(obj, hrotmat, vrotmat, translation)
   
-
 end
 
 function _update()

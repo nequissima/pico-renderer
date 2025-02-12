@@ -127,7 +127,7 @@ function create_object(polygonList, centrePoint)
 end
 
 
--- selects the color based on the Y value of the normal vector
+-- selects the color based on which component of the normal vector has the greatest magnitude
 function shader1(normal)
 
   local absY = abs(normal.y)
@@ -145,12 +145,98 @@ function shader1(normal)
 
 end
 
+-- top down lighting shader
+function shader2(normal)
+
+  local y = normal.y
+
+  if y > 0.66 then
+    color(1)
+  elseif y > 0.33 then
+    color(2)
+  elseif y > 0 then
+    color(3)
+  elseif y > -0.33 then
+    color(4)
+  elseif y > -0.66 then
+    color(5)
+  else
+    color(6)
+  end
+
+end
+
+
+-- lighting shader with dithering
+-- this is such spaghetti but I'm not sure there's an easier way
+function shader3(normal)
+
+  local y = normal.y
+
+  if y > 0.82 then
+    color(1)
+    fillp(0)
+  elseif y > 0.64 then
+    color(0x12)
+    fillp(0b0011001111001100)
+  elseif y > 0.45 then
+    color(2)
+    fillp(0)
+  elseif y > 0.27 then
+    color(0x23)
+    fillp(0b0011001111001100)
+  elseif y > 0.09 then
+    color(3)
+    fillp(0)
+  elseif y > -0.09 then
+    color(0x34)
+    fillp(0b0011001111001100)
+  elseif y > -0.27 then
+    color(4)
+    fillp(0)
+  elseif y > -0.45 then
+    color(0x45)
+    fillp(0b0011001111001100)
+  elseif y > -0.64 then
+    color(5)
+    fillp(0)
+  elseif y > -0.82 then
+    color(0x56)
+    fillp(0b0011001111001100)
+  else
+    color(6)
+    fillp(0)
+  end
+end
+
+
+-- initializes the red-blue palette
+function redbluepalette()
+  pal(1, 8, 1)
+  pal(2, 2, 1)
+  pal(3, -14, 1)
+  pal(4, -15, 1)
+  pal(5, -4, 1)
+  pal(6, 12, 1)
+end
+
+
+-- initializes the red palette
+function redpalette()
+  pal(1, 14, 1)
+  pal(2, 8, 1)
+  pal(3, -8, 1)
+  pal(4, 2, 1)
+  pal(5, -14, 1)
+  pal(6, 0, 1)
+end
+
 
 -- renders a polygon on the screen
 -- assumes that the polygon has been converted to 2d
 function render_polygon(polygon, shader)
 
-  shader1(polygon.normal)
+  shader3(polygon.normal)
   -- placeholder, the render func should change the color settings
   draw_triangle(polygon[1], polygon[2], polygon[3])
 
@@ -209,7 +295,8 @@ end
 
 
 -- takes a polygon and applies a rotation matrix
--- does NOT return a new polygon
+-- DOES NOT RETURN A NEW POLYGON
+-- TRANSFORMS THE GIVEN POLY
 function rotate_polygon(polygon, rotMat)
 
   polygon[1] = multiply_matrix_vector_3d(rotMat, polygon[1])
@@ -219,6 +306,10 @@ function rotate_polygon(polygon, rotMat)
 
 end
 
+
+-- takes a polygon and translates it according to the translation vector
+-- DOES NOT RETURN A NEW POLYGON
+-- TRANSFORMS THE GIVEN POLY
 function translate_polygon(polygon, vector)
 
   polygon[1] = add_vectors(polygon[1], vector)
@@ -254,7 +345,7 @@ function render_object(object, objectRotH, objectRotV, objectTrans)
 
   for i, v in ipairs(newlist) do
     render_polygon(polygon_to_relative(v), nil)
-    print(tostr(v.normal.x) .. ", " .. tostr(v.normal.y) .. ", " .. tostr(v.normal.z))
+    -- print(tostr(v.normal.x) .. ", " .. tostr(v.normal.y) .. ", " .. tostr(v.normal.z))
   end
 
 end
