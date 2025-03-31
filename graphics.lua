@@ -236,7 +236,7 @@ end
 -- assumes that the polygon has been converted to 2d
 function render_polygon(polygon, shader)
 
-  shader3(polygon.normal)
+  shader(polygon.normal)
   -- placeholder, the render func should change the color settings
   draw_triangle(polygon[1], polygon[2], polygon[3])
 
@@ -321,7 +321,7 @@ end
 
 -- takes an object and renders it on the screen
 -- assumes centre point of object is at 0,0,0 and rotates it then translates it
-function render_object(object, objectRotH, objectRotV, objectTrans)
+function render_object(object, objectRotH, objectRotV, objectTrans, shader)
 
   local newlist = {}
   local temppoly
@@ -332,8 +332,10 @@ function render_object(object, objectRotH, objectRotV, objectTrans)
     rotate_polygon(temppoly, objectRotV)
     rotate_polygon(temppoly, objectRotH)
     translate_polygon(temppoly, objectTrans)
+
     -- realistically we should caluclate the cpoint approx when we create a poly and then rotate it
     -- i'd have to refactor a lot of shit for that though :(
+    
     if (dot_product_3d(cpoint_approx(temppoly), temppoly.normal) < 0) then
       newlist[newlistindex] = temppoly
       newlistindex += 1
@@ -344,7 +346,7 @@ function render_object(object, objectRotH, objectRotV, objectTrans)
   newlist = sort_polygons(newlist)
 
   for i, v in ipairs(newlist) do
-    render_polygon(polygon_to_relative(v), nil)
+    render_polygon(polygon_to_relative(v), shader)
     -- print(tostr(v.normal.x) .. ", " .. tostr(v.normal.y) .. ", " .. tostr(v.normal.z))
   end
 
