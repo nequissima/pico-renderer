@@ -82,11 +82,14 @@ end
 
 -- takes three points and returns a polygon. it is assumed that the order of the polygons is counter-clockwise when looking
 -- in the direction opposite the normal vector
-function create_3d_polygon(vector1, vector2, vector3)
+function create_3d_polygon(vector1, vector2, vector3, v1texture, v2texture, v3texture)
 
   return {[1] = vector1,
           [2] = vector2,
           [3] = vector3,
+          [4] = v1texture,
+          [5] = v2texture,
+          [6] = v3texture,
           ["normal"] = calculate_surface_normal(vector1, vector2, vector3)}
 
 end
@@ -99,6 +102,9 @@ function clone_3d_polygon(v)
     create_vector_3d(v[1].x, v[1].y, v[1].z),
     create_vector_3d(v[2].x, v[2].y, v[2].z),
     create_vector_3d(v[3].x, v[3].y, v[3].z),
+    create_vector_2d(v[4].x, v[4].y),
+    create_vector_2d(v[5].x, v[5].y),
+    create_vector_2d(v[6].x, v[6].y),
     ["normal"] = create_vector_3d(v["normal"].x, v["normal"].y, v["normal"].z),
   }
 
@@ -110,10 +116,9 @@ end
 -- NOTE: the normal vector is still in 3d space because it is needed for the shader function
 function polygon_to_relative(polygon)
 
-  return {[1] = _3d_vector_to_screenspace(polygon[1]),
-          [2] = _3d_vector_to_screenspace(polygon[2]),
-          [3] = _3d_vector_to_screenspace(polygon[3]),
-          ["normal"] = polygon.normal}
+  polygon[1] = _3d_vector_to_screenspace(polygon[1])
+  polygon[2] = _3d_vector_to_screenspace(polygon[2])
+  polygon[3] = _3d_vector_to_screenspace(polygon[3])
 
 end
 
@@ -346,7 +351,8 @@ function render_object(object, objectRotH, objectRotV, objectTrans, shader)
   newlist = sort_polygons(newlist)
 
   for i, v in ipairs(newlist) do
-    render_polygon(polygon_to_relative(v), shader)
+    polygon_to_relative(v)
+    render_polygon(v, shader)
     -- print(tostr(v.normal.x) .. ", " .. tostr(v.normal.y) .. ", " .. tostr(v.normal.z))
   end
 
@@ -360,10 +366,7 @@ function clone_polylist(polylist)
 
   for i,v in ipairs(polylist) do
     newlist[i] = {
-      create_vector_3d(v[1].x, v[1].y, v[1].z),
-      create_vector_3d(v[2].x, v[2].y, v[2].z),
-      create_vector_3d(v[3].x, v[3].y, v[3].z),
-      ["normal"] = create_vector_3d(v["normal"].x, v["normal"].y, v["normal"].z),
+      clone_3d_polygon(v)
     }
   end
 

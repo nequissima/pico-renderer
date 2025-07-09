@@ -100,7 +100,10 @@ function create_icosahedron()
     polylist[i] = create_3d_polygon(
       vectorlist[facelist[1+step]],
       vectorlist[facelist[2+step]],
-      vectorlist[facelist[3+step]]
+      vectorlist[facelist[3+step]],
+      create_vector_2d(0,0), --DEBUG
+      create_vector_2d(0,0), --DEBUG
+      create_vector_2d(0,0) --DEBUG
     )
     step += 3
 
