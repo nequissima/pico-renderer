@@ -15,9 +15,10 @@ function draw_triangle(point1, point2, point3)
   if (a.y < b.y) then a,b = b,a end
 
   -- variables for the interpolation tables
-  local line1
-  local line2
-  local line3
+  local line1 = {}
+  local line2 = {}
+  local startY = round_positive(a.y)
+  local endY = round_positive(c.y)
 
   -- test for the possible cases
   if (a.y == b.y) then
@@ -28,14 +29,16 @@ function draw_triangle(point1, point2, point3)
       local maxX = max(max(a.x, b.x), c.x)
 
       line(minX, a.y, maxX, a.y)
+
+      -- TODO: ADD SPECIAL CASE
       
     else
       -- a and b are on a horizontal line
 
-      line1 = interpolate_coords(a, c)
-      line2 = interpolate_coords(b, c)
+      interpolate_coords(a, c, line1)
+      interpolate_coords(b, c, line2)
 
-      _render_triangle_part(line1, line2)
+      _render_triangle_part(line1, line2, startY, endY)
 
     end
 
@@ -44,22 +47,21 @@ function draw_triangle(point1, point2, point3)
     if (b.y == c.y) then
       -- b and c are on a horizontal line
 
-      line1 = interpolate_coords(a, b)
-      line2 = interpolate_coords(a, c)
+      interpolate_coords(a, b, line1)
+      interpolate_coords(a, c, line2)
 
-      _render_triangle_part(line1, line2)
+      _render_triangle_part(line1, line2, startY, endY)
 
     else
       -- none of the points have the same height
 
       -- interpolate the lines between points
-      line1 = interpolate_coords(a, c)
-      line2 = interpolate_coords(a, b)
-      line3 = interpolate_coords(b, c)
+      interpolate_coords(a, c, line1)
+      interpolate_coords(a, b, line2)
+      interpolate_coords(b, c, line2)
 
       -- one line of overdraw here but it's okay I think
-      _render_triangle_part(line2, line1)
-      _render_triangle_part(line3, line1)
+      _render_triangle_part(line1, line2, startY, endY)
 
     end
 
@@ -69,9 +71,9 @@ end
 
 
 -- takes two interpolated lines and fills in the triangle with horizontal lines (the shorter line must be line1)
-function _render_triangle_part(line1, line2)
+function _render_triangle_part(line1, line2, startY, endY)
 
-  for y = line1.startY, line1.endY, -1 do
+  for y = startY, endY, -1 do
 
     line(line1[y], y, line2[y], y)
 

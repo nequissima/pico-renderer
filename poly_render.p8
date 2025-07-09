@@ -9,6 +9,8 @@ __lua__
 
 cameradir = {["x"] = 0, ["y"] = 0, ["z"] = 1}
 origin = {["x"] = 0, ["y"] = 0, ["z"] = 0}
+cycle = 1 -- DEBUG
+
 
 -- main loop
 function _init()
@@ -43,6 +45,7 @@ function _draw()
 
   cls()
   render_object(obj, hrotmat, vrotmat, translation, shader3)
+  cycle = 1
   
 end
 

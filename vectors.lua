@@ -40,7 +40,7 @@ end
 
 
 -- takes two points and returns a table with y,x(!!) pairs for each y value between(inclusive) the two points
-function interpolate_coords(vector1, vector2)
+function interpolate_coords(vector1, vector2, resultTable)
 
   -- making sure first point is the higher one
   if vector1.y < vector2.y then
@@ -56,21 +56,16 @@ function interpolate_coords(vector1, vector2)
   local xDiff  = endX - startX -- not strictly necessary, you can calculate xStep directly
   local yDiff  = startY - endY -- should always be positive
   local xStep  = xDiff / yDiff
-  
-  local returnTable = {["startY"] = startY,
-                       ["endY"] = endY}
 
   -- PERFORMANCE: rounding the numbers here, hopefully not too big of a perf hit, important for how the triangles look
   -- The numbers should be rounded ONLY ONCE here and nowhere else.
   local step = 0
   for y = startY, endY, -1 do
 
-    returnTable[y] = round_positive(startX + (step * xStep))
+    resultTable[y] = round_positive(startX + (step * xStep))
     step += 1
 
   end
-
-  return returnTable
   
 end
 
