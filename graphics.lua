@@ -1,10 +1,10 @@
 -- graphics & drawing functions
 
 -- draws triangle defined by three points on the screen
-function draw_triangle(point1, point2, point3)
+function draw_polygon(polygon)
 
   -- PERFORMANCE: to save tokens you can remove this and rename the abc to the points
-  local a, b, c = point1, point2, point3
+  local a, b, c = polygon[1], polygon[2], polygon[3]
 
 
   --[[ sort the points into descending height order so that
@@ -38,8 +38,6 @@ function draw_triangle(point1, point2, point3)
       interpolate_coords(a, c, line1)
       interpolate_coords(b, c, line2)
 
-      _render_triangle_part(line1, line2, startY, endY)
-
     end
 
   else
@@ -50,8 +48,6 @@ function draw_triangle(point1, point2, point3)
       interpolate_coords(a, b, line1)
       interpolate_coords(a, c, line2)
 
-      _render_triangle_part(line1, line2, startY, endY)
-
     else
       -- none of the points have the same height
 
@@ -60,10 +56,27 @@ function draw_triangle(point1, point2, point3)
       interpolate_coords(a, b, line2)
       interpolate_coords(b, c, line2)
 
-      -- one line of overdraw here but it's okay I think
-      _render_triangle_part(line1, line2, startY, endY)
-
     end
+
+  end
+
+  -- texture rendering goes here
+
+  local zInverseA = (1 / polygon[1].z)
+  local zInverseB = (1 / polygon[2].z)
+  local zInverseC = (1 / polygon[3].z)
+  local zInverseAB = zInverseB - zInverseA
+  local zInverseAC = zInverseC - zInverseA
+
+  local x1, y1, x2, y2 = polygon[5].x, polygon[5].y, polygon[6].x, polygon[6].y
+  local xStepAC = (-y1) / (x1 * y2 - x2 * y1)
+  local xStepAB = -(xStepAB * y2) / y1
+  local yStepAC = (-x1) / (x2 * y1 - x1 * y2)
+  local yStepAB = -(yStepAB * x2) / x1
+
+  for y = startY, endY, -1 do
+
+    
 
   end
   
@@ -86,12 +99,12 @@ end
 -- in the direction opposite the normal vector
 function create_3d_polygon(vector1, vector2, vector3, v1texture, v2texture, v3texture)
 
-  return {[1] = vector1,
-          [2] = vector2,
-          [3] = vector3,
-          [4] = v1texture,
-          [5] = v2texture,
-          [6] = v3texture,
+  return {[1] = vector1,  -- point a
+          [2] = vector2,  -- point b
+          [3] = vector3,  -- point c
+          [4] = v1texture,  -- UV coordinate for point a
+          [5] = v2texture,  -- UV vector ab
+          [6] = v3texture,  -- UV vector ac
           ["normal"] = calculate_surface_normal(vector1, vector2, vector3)}
 
 end
@@ -101,12 +114,12 @@ end
 function clone_3d_polygon(v)
 
   return {
-    create_vector_3d(v[1].x, v[1].y, v[1].z),
-    create_vector_3d(v[2].x, v[2].y, v[2].z),
-    create_vector_3d(v[3].x, v[3].y, v[3].z),
-    create_vector_2d(v[4].x, v[4].y),
-    create_vector_2d(v[5].x, v[5].y),
-    create_vector_2d(v[6].x, v[6].y),
+    create_vector_3d(v[1].x, v[1].y, v[1].z), -- point a
+    create_vector_3d(v[2].x, v[2].y, v[2].z), -- point b
+    create_vector_3d(v[3].x, v[3].y, v[3].z), -- point c
+    create_vector_2d(v[4].x, v[4].y), -- UV coordinate for point a
+    create_vector_2d(v[5].x, v[5].y), -- UV vector ab
+    create_vector_2d(v[6].x, v[6].y), -- UV vector ac
     ["normal"] = create_vector_3d(v["normal"].x, v["normal"].y, v["normal"].z),
   }
 
@@ -238,18 +251,6 @@ function redpalette()
   pal(6, 0, 1)
 end
 
-
--- renders a polygon on the screen
--- assumes that the polygon has been converted to 2d
-function render_polygon(polygon, shader)
-
-  shader(polygon.normal)
-  -- placeholder, the render func should change the color settings
-  draw_triangle(polygon[1], polygon[2], polygon[3])
-
-end
-
-
 -- takes a polygon and returns an approximate center point for it
 function cpoint_approx(polygon)
 
@@ -354,7 +355,7 @@ function render_object(object, objectRotH, objectRotV, objectTrans, shader)
 
   for i, v in ipairs(newlist) do
     polygon_to_relative(v)
-    render_polygon(v, shader)
+    draw_polygon(v)
     -- print(tostr(v.normal.x) .. ", " .. tostr(v.normal.y) .. ", " .. tostr(v.normal.z))
   end
 

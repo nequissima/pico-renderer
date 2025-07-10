@@ -70,7 +70,7 @@ function interpolate_coords(vector1, vector2, resultTable)
 end
 
 
--- takes a 3d vector and returns its position in relative screenspace coordinates (-1 to 1)
+-- takes a 3d vector and returns its position on the screen (0 to 127)
 function _3d_vector_to_screenspace(vector)
 
   -- this function assumes a horizontal and vertical FOV of 90.
@@ -80,8 +80,11 @@ function _3d_vector_to_screenspace(vector)
   -- local and global rotation must be done before calling this function
 
   -- this vector returns screenspace coordinates that are off the screen, offscreen polys have to be culled later.
+  -- the depth is stored in the vector's z value
 
-  return create_vector_2d(64 + (vector.x * 64 / vector.z), 64 + (-vector.y * 64 / vector.z))
+  --TODO: this should probably work in place and not create a new vector for performance
+
+  return create_vector_3d(64 + (vector.x * 64 / vector.z), 64 + (-vector.y * 64 / vector.z), dist_3d(vector, origin))
 
 end
 
@@ -102,6 +105,24 @@ function sub_vectors(vector1, vector2)
   return create_vector_3d(vector1.x - vector2.x,
                           vector1.y - vector2.y,
                           vector1.z - vector2.z)
+
+end
+
+
+-- multiplies a vector with a constant and returns it
+function multiply_vector_3d(vector, constant)
+
+  return create_vector_3d(vector.x * constant,
+                          vector.y * constant,
+                          vector.z * constant)
+
+end
+
+-- multiplies a vector with a constant and returns it
+function multiply_vector_2d(vector, constant)
+
+  return create_vector_2d(vector.x * constant,
+                          vector.y * constant)
 
 end
 
