@@ -62,21 +62,77 @@ function draw_polygon(polygon)
 
   -- texture rendering goes here
 
-  local zInverseA = (1 / polygon[1].z)
+  -- inverse depths of the points of the polygon
+  local zInverseA = (1 / polygon[1].z) 
   local zInverseB = (1 / polygon[2].z)
   local zInverseC = (1 / polygon[3].z)
-  local zInverseAB = zInverseB - zInverseA
-  local zInverseAC = zInverseC - zInverseA
 
-  local x1, y1, x2, y2 = polygon[5].x, polygon[5].y, polygon[6].x, polygon[6].y
-  local xStepAC = (-y1) / (x1 * y2 - x2 * y1)
-  local xStepAB = -(xStepAB * y2) / y1
-  local yStepAC = (-x1) / (x2 * y1 - x1 * y2)
-  local yStepAB = -(yStepAB * x2) / x1
+  local ab = sub_vectors(polygon[2], polygon[1])
+  local ac = sub_vectors(polygon[3], polygon[1])
+
+  -- calculating the value of the UV vectors for each pixel step taken
+  local x1, y1, x2, y2 = ab.x, ab.y, ac.x, ac.y
+  local xStepV = (-y1) / (x1 * y2 - x2 * y1)
+  local xStepU = -(xStepV * y2) / y1
+  local yStepV = (-x1) / (x2 * y1 - x1 * y2)
+  local yStepU = -(yStepV * x2) / x1
+
+  -- current U and V
+  local curU = 0
+  local curV = 0
+
+  local step = 1
+  
+  local lineXDiff = line2[round_positive(b.y)] - line1[round_positive(b.y)]
+  if (lineXDiff < 0) then
+    step = -1
+  elseif (lineXDiff == 0) then
+    step = 0
+  end
+
+  local lastX = line1[startY]
 
   for y = startY, endY, -1 do
 
+    local xDiff = (line1[y] - lastX)
+    curU += xStepU * xDiff * step
+    curV += xStepV * xDiff * step
+
+    for x = line1[y], line2[y], step do
+
+      local u = multiply_vector_2d(polygon[5], (curU * zInverseB) / ((1-curU) * zInverseA + curU * zInverseB))
+      local v = multiply_vector_2d(polygon[6], (curV * zInverseC) / ((1-curV) * zInverseA + curV * zInverseC))
+      local textureCoord = add_vectors_2d(add_vectors_2d(u, v), polygon[4])
+      lastX = x
+
+      local color = sget(
+        round_positive(textureCoord.x), round_positive(textureCoord.y)
+      )
+
+      if color == 0 then color = 5 end
+
+      pset(x, y, color)
+      if (cycle == 0) then
+        printh("a: " .. tostr(a), "log.txt")
+        printh("b: " .. tostr(b), "log.txt")
+        printh("c: " .. tostr(c), "log.txt")
+        printh("u: " .. tostr(u), "log.txt")
+        printh("v: " .. tostr(v), "log.txt")
+        printh("curU: " .. tostr(curU), "log.txt")
+        printh("curV: " .. tostr(curV), "log.txt")
+        printh("tC: " .. tostr(textureCoord), "log.txt")
+      end
+
+      curU += xStepU * step
+      curV += xStepV * step
+    end
     
+    curU += -yStepU
+    curV += -yStepV 
+    
+
+    --shader3(polygon.normal)
+    --line(line1[y], y, line2[y], y)
 
   end
   
@@ -103,8 +159,8 @@ function create_3d_polygon(vector1, vector2, vector3, v1texture, v2texture, v3te
           [2] = vector2,  -- point b
           [3] = vector3,  -- point c
           [4] = v1texture,  -- UV coordinate for point a
-          [5] = v2texture,  -- UV vector ab
-          [6] = v3texture,  -- UV vector ac
+          [5] = v2texture,  -- UV coordinate for point b
+          [6] = v3texture,  -- UV coordinate for point c
           ["normal"] = calculate_surface_normal(vector1, vector2, vector3)}
 
 end

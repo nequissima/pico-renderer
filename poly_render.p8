@@ -9,7 +9,7 @@ __lua__
 
 cameradir = {["x"] = 0, ["y"] = 0, ["z"] = 1}
 origin = {["x"] = 0, ["y"] = 0, ["z"] = 0}
-cycle = 1 -- DEBUG
+cycle = 0 -- DEBUG
 
 
 -- main loop
@@ -19,6 +19,7 @@ function _init()
   -- you get what i mean here
 
   -- horizontal rotation and the update increment
+
   hrot = 0
   hrotd = 0.025
 
@@ -36,8 +37,6 @@ function _init()
   vrotmat = create_rotation_matrix_x(vrot)
 
   obj = create_icosahedron()
-
-  redpalette()
 
 end
 

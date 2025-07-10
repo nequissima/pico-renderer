@@ -99,6 +99,16 @@ function add_vectors(vector1, vector2)
 end
 
 
+-- takes two 3d vectors and adds them together
+function add_vectors_2d(vector1, vector2)
+
+  return create_vector_2d(vector1.x + vector2.x,
+                          vector1.y + vector2.y)
+
+end
+
+
+
 -- takes two 3d vectors and subtracts the second from the first
 function sub_vectors(vector1, vector2)
 
