@@ -5,6 +5,7 @@ function draw_polygon(polygon)
 
   -- PERFORMANCE: to save tokens you can remove this and rename the abc to the points
   local a, b, c = polygon[1], polygon[2], polygon[3]
+  local uva, uvb, uvc = polygon[4], polygon[5], polygon[6]
 
 
   --[[ sort the points into descending height order so that
@@ -63,69 +64,73 @@ function draw_polygon(polygon)
   -- texture rendering goes here
 
   -- inverse depths of the points of the polygon
-  local zInverseA = (1 / polygon[1].z) 
-  local zInverseB = (1 / polygon[2].z)
-  local zInverseC = (1 / polygon[3].z)
+  local zInverseA = (1 / a.z) 
+  local zInverseB = (1 / b.z)
+  local zInverseC = (1 / c.z)
 
-  local ab = sub_vectors(polygon[2], polygon[1])
-  local ac = sub_vectors(polygon[3], polygon[1])
+  local ab = sub_vectors(b,a)
+  local ac = sub_vectors(c,a)
 
   -- calculating the value of the UV vectors for each pixel step taken
   local x1, y1, x2, y2 = ab.x, ab.y, ac.x, ac.y
-  local xStepV = (-y1) / (x1 * y2 - x2 * y1)
+  local xStepV = (y1) / (x2 * y1 - x1 * y2)
   local xStepU = -(xStepV * y2) / y1
-  local yStepV = (-x1) / (x2 * y1 - x1 * y2)
+  local yStepV = (x1) / (x1 * y2 - x2 * y1)
   local yStepU = -(yStepV * x2) / x1
 
   -- current U and V
   local curU = 0
   local curV = 0
-
-  local step = 1
   
   local lineXDiff = line2[round_positive(b.y)] - line1[round_positive(b.y)]
   if (lineXDiff < 0) then
-    step = -1
-  elseif (lineXDiff == 0) then
-    step = 0
+    line1, line2 = line2, line1
   end
 
   local lastX = line1[startY]
 
   for y = startY, endY, -1 do
 
-    local xDiff = (line1[y] - lastX)
-    curU += xStepU * xDiff * step
-    curV += xStepV * xDiff * step
+    local xDiff = (lastX - line1[y])
+    curU += -xStepU * xDiff
+    curV += -xStepV * xDiff
 
-    for x = line1[y], line2[y], step do
+    for x = line1[y], line2[y], 1 do
 
-      local u = multiply_vector_2d(polygon[5], (curU * zInverseB) / ((1-curU) * zInverseA + curU * zInverseB))
-      local v = multiply_vector_2d(polygon[6], (curV * zInverseC) / ((1-curV) * zInverseA + curV * zInverseC))
+      local u = multiply_vector_2d(uvb, curU)
+
+      local v = multiply_vector_2d(uvc, curV)
+
       local textureCoord = add_vectors_2d(add_vectors_2d(u, v), polygon[4])
-      lastX = x
 
       local color = sget(
         round_positive(textureCoord.x), round_positive(textureCoord.y)
       )
 
-      if color == 0 then color = 5 end
+      -- if color == 0 then color = 5 end
 
       pset(x, y, color)
-      if (cycle == 0) then
-        printh("a: " .. tostr(a), "log.txt")
-        printh("b: " .. tostr(b), "log.txt")
-        printh("c: " .. tostr(c), "log.txt")
-        printh("u: " .. tostr(u), "log.txt")
-        printh("v: " .. tostr(v), "log.txt")
+
+      -- DEBUG
+      if (color == 0 and cycle < 120) then
+        printh("xStepV: " .. tostr(xStepV), "log.txt")
+        printh("xStepU: " .. tostr(xStepU), "log.txt")
+        printh("yStepV: " .. tostr(yStepV), "log.txt")
+        printh("yStepU: " .. tostr(yStepU), "log.txt")
         printh("curU: " .. tostr(curU), "log.txt")
         printh("curV: " .. tostr(curV), "log.txt")
-        printh("tC: " .. tostr(textureCoord), "log.txt")
+        printh("tC x: " .. tostr(textureCoord.x), "log.txt")
+        printh("tC y: " .. tostr(textureCoord.y), "log.txt")
       end
 
-      curU += xStepU * step
-      curV += xStepV * step
+      curU += xStepU
+      curV += xStepV
     end
+
+    lastX = line2[y]
+
+    curU += -xStepU
+    curV += -xStepV
     
     curU += -yStepU
     curV += -yStepV 
@@ -385,7 +390,7 @@ end
 
 -- takes an object and renders it on the screen
 -- assumes centre point of object is at 0,0,0 and rotates it then translates it
-function render_object(object, objectRotH, objectRotV, objectTrans, shader)
+function render_object(object, objectRotH, objectRotV, objectTrans)
 
   local newlist = {}
   local temppoly
