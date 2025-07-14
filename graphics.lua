@@ -212,6 +212,10 @@ function redpalette()
   pal(6, 0, 1)
 end
 
+function dicepalette()
+  pal(2, -8, 1)
+end
+
 -- takes a polygon and returns an approximate center point for it
 function cpoint_approx(polygon)
 

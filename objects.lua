@@ -29,12 +29,32 @@ function create_cube()
   local step = 0
   for i=1,12 do
     
-    polyList[i] = create_3d_polygon(
+    if i % 2 == 0 then
+      polyList[i] = create_3d_polygon(
+        create_vector_3d(newtable[1 + step], newtable[2 + step], newtable[3 + step]),
+        create_vector_3d(newtable[4 + step], newtable[5 + step], newtable[6 + step]),
+        create_vector_3d(newtable[7 + step], newtable[8 + step], newtable[9 + step]),
+        create_vector_2d(0,32), --DEBUG
+        create_vector_2d(31,32),
+        create_vector_2d(0,63) --DEBUG
+        
+      )
+      step += 9
+    else
+
+      polyList[i] = create_3d_polygon(
       create_vector_3d(newtable[1 + step], newtable[2 + step], newtable[3 + step]),
       create_vector_3d(newtable[4 + step], newtable[5 + step], newtable[6 + step]),
-      create_vector_3d(newtable[7 + step], newtable[8 + step], newtable[9 + step])
+      create_vector_3d(newtable[7 + step], newtable[8 + step], newtable[9 + step]),
+      create_vector_2d(31,63), --DEBUG
+      create_vector_2d(0,63),
+      create_vector_2d(31,32) --DEBUG
+      
     )
     step += 9
+
+
+    end
 
   end
 
