@@ -28,7 +28,7 @@ function _init()
   vrotd = 0.01
 
   -- translation vector
-  translation = create_vector_3d(0,0,3)
+  translation = create_vector_3d(0,0,15)
 
   -- horizontal rotation matrix
   hrotmat = create_rotation_matrix_y(hrot)
@@ -36,8 +36,8 @@ function _init()
   -- vertical rotation matrix
   vrotmat = create_rotation_matrix_x(vrot)
 
- -- obj = create_icosahedron()
-  obj = create_cube()
+  obj = create_icosahedron()
+  --obj = create_cube()
 
   dicepalette()
   poke(0x5f2c,3)
@@ -48,6 +48,7 @@ function _draw()
 
   cls()
   render_object(obj, hrotmat, vrotmat, translation)
+  print(stat(1))
 
 end
 

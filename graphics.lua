@@ -26,20 +26,24 @@ function draw_polygon(polygon)
     
     for x = minX, maxX, 1 do
 
+      -- TODO: add precalculation to improve performance
       abpArea = ((bx - ax) * (y - ay) - (by - ay) * (x - ax))
+      if abpArea < 0 then goto xloopfin end
+
       bcpArea = ((cx - bx) * (y - by) - (cy - by) * (x - bx))
+      if bcpArea < 0 then goto xloopfin end
+
       capArea = ((ax - cx) * (y - cy) - (ay - cy) * (x - cx))
+      if capArea < 0 then goto xloopfin end  
 
-      if (abpArea > 0 and bcpArea > 0 and capArea > 0) then
-        
-        aWeight = bcpArea / abcArea
-        bWeight = capArea / abcArea
-        cWeight = abpArea / abcArea
-        
-        pset(x, y, sget(flr(tax * aWeight + tbx * bWeight + tcx * cWeight + 0.5),
-                        flr(tay * aWeight + tby * bWeight + tcy * cWeight + 0.5)))
+      aWeight = bcpArea / abcArea
+      bWeight = capArea / abcArea
+      cWeight = abpArea / abcArea
+      
+      pset(x, y, sget(flr(tax * aWeight + tbx * bWeight + tcx * cWeight + 0.5),
+                      flr(tay * aWeight + tby * bWeight + tcy * cWeight + 0.5)))
 
-      end
+      ::xloopfin::
 
     end
 
