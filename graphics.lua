@@ -5,20 +5,21 @@ function draw_polygon(polygon)
 
   -- saving all of the polygon points into local variables for performance
   local ax, ay, bx, by, cx, cy = polygon[1].x, polygon[1].y, polygon[2].x, polygon[2].y, polygon[3].x, polygon[3].y
-  local tax, tay, tbx, tby, tcx, tcy = polygon[4].x, polygon[4].y, polygon[5].x, polygon[5].y, polygon[6].x, polygon[6].y
+  local tax, tay, tbx, tby, tcx, tcy = polygon[4].x / 100,
+                                       polygon[4].y / 100,
+                                       polygon[5].x / 100,
+                                       polygon[5].y / 100,
+                                       polygon[6].x / 100,
+                                       polygon[6].y / 100
 
-  local abcArea = ((bx - ax) * (cy - ay) - (by - ay) * (cx - ax))
+  local abcArea = ((bx - ax) * (cy - ay) - (by - ay) * (cx - ax)) / 100
   
   local minX = round_positive(min(min(ax, bx), cx))
   local minY = round_positive(min(min(ay, by), cy))
   local maxX = round_positive(max(max(ax, bx), cx))
   local maxY = round_positive(max(max(ay, by), cy))
 
-  local abpArea, bcpArea, capArea
-
-  local color
-
-  local aWeight, bWegiht, cWeight
+  local aWeight, bWeight, cWeight
 
   local ypConstAbp = (bx - ax) / abcArea
   local xpConstAbp = (ay - by) / abcArea
@@ -31,8 +32,6 @@ function draw_polygon(polygon)
   local ypConstCap = (ax - cx) / abcArea
   local xpConstCap = (cy - ay) / abcArea
   local gnConstCap = (ay * cx - ax * cy) / abcArea
-
-  local tx_X, tx_Y
 
   for y = minY, maxY, 1 do
     
@@ -53,7 +52,7 @@ function draw_polygon(polygon)
       bWeight = capArea / abcArea
       cWeight = abpArea / abcArea
 
-      ]]
+      ]]   
 
       aWeight = y * ypConstAbp + x * xpConstAbp + gnConstAbp
       if aWeight < 0 then goto xloopfin end
@@ -64,7 +63,6 @@ function draw_polygon(polygon)
       cWeight = y * ypConstCap + x * xpConstCap + gnConstCap
       if cWeight < 0 then goto xloopfin end
 
-      
       pset(x, y, sget(flr(tax * aWeight + tbx * bWeight + tcx * cWeight + 0.5),
                       flr(tay * aWeight + tby * bWeight + tcy * cWeight + 0.5)))
 
