@@ -101,9 +101,9 @@ function create_icosahedron()
       vectorlist[facelist[1+step]],
       vectorlist[facelist[2+step]],
       vectorlist[facelist[3+step]],
-      create_vector_2d(1,1), --DEBUG
-      create_vector_2d(1,14), --DEBUG
-      create_vector_2d(14,1) --DEBUG
+      create_vector_2d(96,0), --DEBUG
+      create_vector_2d(80,31), --DEBUG
+      create_vector_2d(111,31) --DEBUG
     )
     step += 3
 
