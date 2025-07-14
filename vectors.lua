@@ -93,7 +93,7 @@ function _3d_vector_to_screenspace(vector)
 
   --TODO: this should probably work in place and not create a new vector for performance
 
-  return create_vector_3d(64 + (vector.x * 64 / vector.z), 64 + (-vector.y * 64 / vector.z), dist_3d(vector, origin))
+  return create_vector_3d(32 + (vector.x * 32 / vector.z), 32 + (-vector.y * 32 / vector.z), nil)
 
 end
 

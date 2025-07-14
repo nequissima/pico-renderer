@@ -38,6 +38,8 @@ function _init()
 
   obj = create_icosahedron()
 
+  poke(0x5f2c,3)
+
 end
 
 function _draw()

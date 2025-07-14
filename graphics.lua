@@ -4,14 +4,15 @@
 function draw_polygon(polygon)
 
   -- PERFORMANCE: to save tokens you can remove this and rename the abc to the points
-  local a, b, c, ta, tb, tc = polygon[1], polygon[2], polygon[3], polygon[4], polygon[5], polygon[6]
+  local ax, ay, bx, by, cx, cy = polygon[1].x, polygon[1].y, polygon[2].x, polygon[2].y, polygon[3].x, polygon[3].y
+  local tax, tay, tbx, tby, tcx, tcy = polygon[4].x, polygon[4].y, polygon[5].x, polygon[5].y, polygon[6].x, polygon[6].y
 
-  local abcArea = signedTriArea(a, b, c.x, c.y)
+  local abcArea = ((bx - ax) * (cy - ay) - (by - ay) * (cx - ax))
   
-  local minX = round_positive(min(min(a.x, b.x), c.x))
-  local minY = round_positive(min(min(a.y, b.y), c.y))
-  local maxX = round_positive(max(max(a.x, b.x), c.x))
-  local maxY = round_positive(max(max(a.y, b.y), c.y))
+  local minX = round_positive(min(min(ax, bx), cx))
+  local minY = round_positive(min(min(ay, by), cy))
+  local maxX = round_positive(max(max(ax, bx), cx))
+  local maxY = round_positive(max(max(ay, by), cy))
 
   local abpArea, bcpArea, capArea
 
@@ -21,36 +22,22 @@ function draw_polygon(polygon)
 
   local tx_X, tx_Y
 
-  local vram = {}
-  local mt = {__index = function () return 0 end}
-  setmetatable(vram, mt)
-
   for y = minY, maxY, 1 do
     
     for x = minX, maxX, 1 do
 
-      abpArea = signedTriArea(a, b, x, y)
-      bcpArea = signedTriArea(b, c, x, y)
-      capArea = signedTriArea(c, a, x, y)
+      abpArea = ((bx - ax) * (y - ay) - (by - ay) * (x - ax))
+      bcpArea = ((cx - bx) * (y - by) - (cy - by) * (x - bx))
+      capArea = ((ax - cx) * (y - cy) - (ay - cy) * (x - cx))
 
       if (abpArea > 0 and bcpArea > 0 and capArea > 0) then
         
         aWeight = bcpArea / abcArea
         bWeight = capArea / abcArea
         cWeight = abpArea / abcArea
-
-        tx_X = round_positive(ta.x * aWeight + tb.x * bWeight + tc.x * cWeight)
-        tx_Y = round_positive(ta.y * aWeight + tb.y * bWeight + tc.y * cWeight)
-
-        color = round_positive(sget(tx_X, tx_Y))
-        local memaddress = 0x6000 + y*64 + (x\2)
-        if x % 2 == 1 then
-          color = color << 4
-        end
-
-        --pset(x, y, sget(tx_X, tx_Y))
-        color = color | peek(memaddress, 1)
-        poke(memaddress, color)
+        
+        pset(x, y, sget(flr(tax * aWeight + tbx * bWeight + tcx * cWeight + 0.5),
+                        flr(tay * aWeight + tby * bWeight + tcy * cWeight + 0.5)))
 
       end
 
@@ -327,11 +314,15 @@ function render_object(object, objectRotH, objectRotV, objectTrans)
 
   newlist = sort_polygons(newlist)
 
+  print(stat(1))
+
   for i, v in ipairs(newlist) do
     polygon_to_relative(v)
     draw_polygon(v)
     -- print(tostr(v.normal.x) .. ", " .. tostr(v.normal.y) .. ", " .. tostr(v.normal.z))
   end
+
+  print(stat(1))
 
 end
 
