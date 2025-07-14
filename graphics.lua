@@ -21,6 +21,10 @@ function draw_polygon(polygon)
 
   local tx_X, tx_Y
 
+  local vram = {}
+  local mt = {__index = function () return 0 end}
+  setmetatable(vram, mt)
+
   for y = minY, maxY, 1 do
     
     for x = minX, maxX, 1 do
