@@ -5,6 +5,8 @@ function draw_polygon(polygon)
 
   -- saving all of the polygon points into local variables for performance
   local ax, ay, bx, by, cx, cy = polygon[1].x, polygon[1].y, polygon[2].x, polygon[2].y, polygon[3].x, polygon[3].y
+
+  -- these are divided by 100 to offset the triangle area being divided by 100 for the final calculations
   local tax, tay, tbx, tby, tcx, tcy = polygon[4].x / 100,
                                        polygon[4].y / 100,
                                        polygon[5].x / 100,
@@ -12,15 +14,21 @@ function draw_polygon(polygon)
                                        polygon[6].x / 100,
                                        polygon[6].y / 100
 
+  -- 1/2 shoelace formula for triangle area, divided by 100
+  -- this needs to be divided by a large number, or otherwise the precalculated coefficients
+  -- become too small, and we start getting weird artifacting from lack of precision
   local abcArea = ((bx - ax) * (cy - ay) - (by - ay) * (cx - ax)) / 100
   
+  -- bounding box for the polygon
   local minX = round_positive(min(min(ax, bx), cx))
   local minY = round_positive(min(min(ay, by), cy))
   local maxX = round_positive(max(max(ax, bx), cx))
   local maxY = round_positive(max(max(ay, by), cy))
 
+  -- weights for texture co-ordinates
   local aWeight, bWeight, cWeight
 
+  -- we pre-calculate the coefficients and constants 
   local ypConstAbp = (bx - ax) / abcArea
   local xpConstAbp = (ay - by) / abcArea
   local gnConstAbp = (by * ax - bx * ay) / abcArea
@@ -63,6 +71,8 @@ function draw_polygon(polygon)
       cWeight = y * ypConstCap + x * xpConstCap + gnConstCap
       if cWeight < 0 then goto xloopfin end
 
+      -- this could maybe be replaced by directly changing the video memory
+      -- don't know if that's even any faster, however
       pset(x, y, sget(flr(tax * aWeight + tbx * bWeight + tcx * cWeight + 0.5),
                       flr(tay * aWeight + tby * bWeight + tcy * cWeight + 0.5)))
 
