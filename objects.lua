@@ -94,6 +94,18 @@ function create_icosahedron()
 
   end
 
+  local cpoint = vectorlist[1]
+
+  for i = 2, 12, 1 do
+    cpoint = add_vectors(cpoint, vectorlist[i])
+  end
+
+  cpoint = multiply_vector_3d(cpoint, 1/12)
+
+  for i = 1, 12, 1 do
+    vectorlist[i] = sub_vectors(vectorlist[i], cpoint)
+  end
+
   step = 0
   for i=1,20 do
 
