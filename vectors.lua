@@ -23,6 +23,15 @@ function create_vector_3d(xCoord, yCoord, zCoord)
 end
 
 
+function round_vector_3d(vector)
+
+  vector.x = round_positive(vector.x)
+  vector.y = round_positive(vector.y)
+  vector.z = round_positive(vector.z)
+
+end
+
+
 -- takes a 2d-vector and returns a clone
 function clone_2d_vector(inputVector)
 

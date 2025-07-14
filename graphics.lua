@@ -4,154 +4,63 @@
 function draw_polygon(polygon)
 
   -- PERFORMANCE: to save tokens you can remove this and rename the abc to the points
-  local a, b, c = polygon[1], polygon[2], polygon[3]
-  local uva, uvb, uvc = polygon[4], polygon[5], polygon[6]
+  local a, b, c, ta, tb, tc = polygon[1], polygon[2], polygon[3], polygon[4], polygon[5], polygon[6]
 
-
-  --[[ sort the points into descending height order so that
-       a.y > b.y > c.y  ]]
-
-  if (a.y < b.y) then a,b = b,a end
-  if (b.y < c.y) then b,c = c,b end
-  if (a.y < b.y) then a,b = b,a end
-
-  -- variables for the interpolation tables
-  local line1 = {}
-  local line2 = {}
-  local startY = round_positive(a.y)
-  local endY = round_positive(c.y)
-
-  -- test for the possible cases
-  if (a.y == b.y) then
-
-    if (b.y == c.y) then
-      -- all points are on a horizontal line
-      local minX = min(min(a.x, b.x), c.x)
-      local maxX = max(max(a.x, b.x), c.x)
-
-      line(minX, a.y, maxX, a.y)
-
-      -- TODO: ADD SPECIAL CASE
-      
-    else
-      -- a and b are on a horizontal line
-
-      interpolate_coords(a, c, line1)
-      interpolate_coords(b, c, line2)
-
-    end
-
-  else
-
-    if (b.y == c.y) then
-      -- b and c are on a horizontal line
-
-      interpolate_coords(a, b, line1)
-      interpolate_coords(a, c, line2)
-
-    else
-      -- none of the points have the same height
-
-      -- interpolate the lines between points
-      interpolate_coords(a, c, line1)
-      interpolate_coords(a, b, line2)
-      interpolate_coords(b, c, line2)
-
-    end
-
-  end
-
-  -- texture rendering goes here
-
-  -- inverse depths of the points of the polygon
-  local zInverseA = (1 / a.z) 
-  local zInverseB = (1 / b.z)
-  local zInverseC = (1 / c.z)
-
-  local ab = sub_vectors(b,a)
-  local ac = sub_vectors(c,a)
-
-  -- calculating the value of the UV vectors for each pixel step taken
-  local x1, y1, x2, y2 = ab.x, ab.y, ac.x, ac.y
-  local xStepV = (y1) / (x2 * y1 - x1 * y2)
-  local xStepU = -(xStepV * y2) / y1
-  local yStepV = (x1) / (x1 * y2 - x2 * y1)
-  local yStepU = -(yStepV * x2) / x1
-
-  -- current U and V
-  local curU = 0
-  local curV = 0
+  local abcArea = signedTriArea(a, b, c.x, c.y)
   
-  local lineXDiff = line2[round_positive(b.y)] - line1[round_positive(b.y)]
-  if (lineXDiff < 0) then
-    line1, line2 = line2, line1
-  end
+  local minX = round_positive(min(min(a.x, b.x), c.x))
+  local minY = round_positive(min(min(a.y, b.y), c.y))
+  local maxX = round_positive(max(max(a.x, b.x), c.x))
+  local maxY = round_positive(max(max(a.y, b.y), c.y))
 
-  local lastX = line1[startY]
+  local abpArea, bcpArea, capArea
 
-  for y = startY, endY, -1 do
+  local color
 
-    local xDiff = (lastX - line1[y])
-    curU += -xStepU * xDiff
-    curV += -xStepV * xDiff
+  local aWeight, bWegiht, cWeight
 
-    for x = line1[y], line2[y], 1 do
+  local tx_X, tx_Y
 
-      local u = multiply_vector_2d(uvb, curU)
+  for y = minY, maxY, 1 do
+    
+    for x = minX, maxX, 1 do
 
-      local v = multiply_vector_2d(uvc, curV)
+      abpArea = signedTriArea(a, b, x, y)
+      bcpArea = signedTriArea(b, c, x, y)
+      capArea = signedTriArea(c, a, x, y)
 
-      local textureCoord = add_vectors_2d(add_vectors_2d(u, v), polygon[4])
+      if (abpArea > 0 and bcpArea > 0 and capArea > 0) then
+        
+        aWeight = bcpArea / abcArea
+        bWeight = capArea / abcArea
+        cWeight = abpArea / abcArea
 
-      local color = sget(
-        round_positive(textureCoord.x), round_positive(textureCoord.y)
-      )
+        tx_X = round_positive(ta.x * aWeight + tb.x * bWeight + tc.x * cWeight)
+        tx_Y = round_positive(ta.y * aWeight + tb.y * bWeight + tc.y * cWeight)
 
-      -- if color == 0 then color = 5 end
+        color = round_positive(sget(tx_X, tx_Y))
+        local memaddress = 0x6000 + y*64 + (x\2)
+        if x % 2 == 1 then
+          color = color << 4
+        end
 
-      pset(x, y, color)
+        --pset(x, y, sget(tx_X, tx_Y))
+        color = color | peek(memaddress, 1)
+        poke(memaddress, color)
 
-      -- DEBUG
-      if (color == 0 and cycle < 120) then
-        printh("xStepV: " .. tostr(xStepV), "log.txt")
-        printh("xStepU: " .. tostr(xStepU), "log.txt")
-        printh("yStepV: " .. tostr(yStepV), "log.txt")
-        printh("yStepU: " .. tostr(yStepU), "log.txt")
-        printh("curU: " .. tostr(curU), "log.txt")
-        printh("curV: " .. tostr(curV), "log.txt")
-        printh("tC x: " .. tostr(textureCoord.x), "log.txt")
-        printh("tC y: " .. tostr(textureCoord.y), "log.txt")
       end
 
-      curU += xStepU
-      curV += xStepV
     end
-
-    lastX = line2[y]
-
-    curU += -xStepU
-    curV += -xStepV
-    
-    curU += -yStepU
-    curV += -yStepV 
-    
-
-    --shader3(polygon.normal)
-    --line(line1[y], y, line2[y], y)
 
   end
   
 end
 
 
--- takes two interpolated lines and fills in the triangle with horizontal lines (the shorter line must be line1)
-function _render_triangle_part(line1, line2, startY, endY)
+-- assumes points are in counter-clockwise order.
+function signedTriArea(a, b, cx, cy)
 
-  for y = startY, endY, -1 do
-
-    line(line1[y], y, line2[y], y)
-
-  end
+  return ((b.x - a.x) * (cy - a.y) - (b.y - a.y) * (cx - a.x))
 
 end
 

@@ -17,3 +17,9 @@ function dist_3d(p1, p2)
   return sqrt(square(p1.x - p2.x) + square(p1.y - p2.y) + square(p1.z - p2.z))
 
 end
+
+function clamp(mn, v, mx)
+
+  return min(max(mn, v), mx)
+
+end
