@@ -3,6 +3,7 @@
 -- draws triangle defined by three points on the screen
 function draw_polygon(polygon)
 
+  -- saving all of the polygon points into local variables for performance
   local ax, ay, bx, by, cx, cy = polygon[1].x, polygon[1].y, polygon[2].x, polygon[2].y, polygon[3].x, polygon[3].y
   local tax, tay, tbx, tby, tcx, tcy = polygon[4].x, polygon[4].y, polygon[5].x, polygon[5].y, polygon[6].x, polygon[6].y
 
@@ -313,7 +314,7 @@ function render_object(object, objectRotH, objectRotV, objectTrans)
 
   newlist = sort_polygons(newlist)
 
-  print(stat(1))
+  -- print(stat(1))
 
   for i, v in ipairs(newlist) do
     polygon_to_relative(v)
@@ -321,7 +322,7 @@ function render_object(object, objectRotH, objectRotV, objectTrans)
     -- print(tostr(v.normal.x) .. ", " .. tostr(v.normal.y) .. ", " .. tostr(v.normal.z))
   end
 
-  print(stat(1))
+  -- print(stat(1))
 
 end
 
