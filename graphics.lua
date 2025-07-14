@@ -20,13 +20,26 @@ function draw_polygon(polygon)
 
   local aWeight, bWegiht, cWeight
 
+  local ypConstAbp = (bx - ax) / abcArea
+  local xpConstAbp = (ay - by) / abcArea
+  local gnConstAbp = (by * ax - bx * ay) / abcArea
+
+  local ypConstBcp = (cx - bx) / abcArea
+  local xpConstBcp = (by - cy) / abcArea
+  local gnConstBcp = (cy * bx - cx * by) / abcArea
+
+  local ypConstCap = (ax - cx) / abcArea
+  local xpConstCap = (cy - ay) / abcArea
+  local gnConstCap = (ay * cx - ax * cy) / abcArea
+
   local tx_X, tx_Y
 
   for y = minY, maxY, 1 do
     
     for x = minX, maxX, 1 do
 
-      -- TODO: add precalculation to improve performance
+      --[[
+
       abpArea = ((bx - ax) * (y - ay) - (by - ay) * (x - ax))
       if abpArea < 0 then goto xloopfin end
 
@@ -39,6 +52,18 @@ function draw_polygon(polygon)
       aWeight = bcpArea / abcArea
       bWeight = capArea / abcArea
       cWeight = abpArea / abcArea
+
+      ]]
+
+      aWeight = y * ypConstAbp + x * xpConstAbp + gnConstAbp
+      if aWeight < 0 then goto xloopfin end
+
+      bWeight = y * ypConstBcp + x * xpConstBcp + gnConstBcp
+      if bWeight < 0 then goto xloopfin end
+
+      cWeight = y * ypConstCap + x * xpConstCap + gnConstCap
+      if cWeight < 0 then goto xloopfin end
+
       
       pset(x, y, sget(flr(tax * aWeight + tbx * bWeight + tcx * cWeight + 0.5),
                       flr(tay * aWeight + tby * bWeight + tcy * cWeight + 0.5)))
@@ -217,7 +242,7 @@ function redpalette()
 end
 
 function dicepalette()
-  pal(2, -8, 1)
+  pal(14, -8, 1)
 end
 
 -- takes a polygon and returns an approximate center point for it
