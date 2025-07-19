@@ -85,7 +85,7 @@ function draw_polygon(polygon)
 end
 
 
--- assumes points are in counter-clockwise order.
+-- assumes points are in clockwise order.
 function signedTriArea(a, b, cx, cy)
 
   return ((b.x - a.x) * (cy - a.y) - (b.y - a.y) * (cx - a.x))
