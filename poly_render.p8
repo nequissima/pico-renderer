@@ -40,7 +40,8 @@ function _init()
   --obj = create_cube()
 
   dicepalette()
-  poke(0x5f2c,3)
+  -- redpalette()
+  -- poke(0x5f2c,3)
 
 end
 

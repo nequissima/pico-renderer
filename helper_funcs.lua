@@ -11,6 +11,7 @@ function square(num)
   return num*num
 end
 
+
 -- takes 2 3d points and returns the distance between them
 function dist_3d(p1, p2)
 
@@ -18,8 +19,11 @@ function dist_3d(p1, p2)
 
 end
 
+
 function clamp(mn, v, mx)
 
   return min(max(mn, v), mx)
 
 end
+
+

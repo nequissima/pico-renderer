@@ -85,10 +85,372 @@ function draw_polygon(polygon)
 end
 
 
--- assumes points are in clockwise order.
-function signedTriArea(a, b, cx, cy)
+function draw_polygon_fast(polygon)
 
-  return ((b.x - a.x) * (cy - a.y) - (b.y - a.y) * (cx - a.x))
+  local xa, ya, xb, yb, xc, yc = polygon[1].x, polygon[1].y, polygon[2].x, polygon[2].y, polygon[3].x, polygon[3].y
+
+  local t_xa, t_ya, t_xb, t_yb, t_xc, t_yc = polygon[4].x,
+                                             polygon[4].y,
+                                             polygon[5].x,
+                                             polygon[5].y,
+                                             polygon[6].x,
+                                             polygon[6].y
+
+
+  -- make sure points a, b, and c are in order from highest y to lowest
+  -- TODO: sort the vectors first, then change all the rest. might need complete rewrite.
+  if (ya < yb) then
+    xa, ya, xb, yb = xb, yb, xa, ya
+    t_xa, t_ya, t_xb, t_yb = t_xb, t_yb, t_xa, t_ya
+  end
+
+  if (yb < yc) then
+    xb, yb, xc, yc = xc, yc, xb, yb
+    t_xb, t_yb, t_xc, t_yc = t_xc, t_yc, t_xb, t_yb
+  end
+
+  if (ya < yb) then
+    xa, ya, xb, yb = xb, yb, xa, ya
+    t_xa, t_ya, t_xb, t_yb = t_xb, t_yb, t_xa, t_ya
+  end
+
+  local yStart1 = flr(ya)
+  local yEnd1 = ceil(yb)
+  local yStart2 = flr(yb)
+  local yEnd2 = ceil(yc)
+
+  if cycle == -1 then
+    printh("yStart1: " .. tostr(yStart1), "log.txt")
+    printh("yEnd1: " .. tostr(yEnd1), "log.txt")
+    printh("yStart2: " .. tostr(yStart2), "log.txt")
+    printh("yEnd2: " .. tostr(yEnd2), "log.txt")
+  end
+
+  -- triangle is vertically too thin to draw
+  if (yEnd2 > yStart1) then
+    goto drawPolygonEnd
+  end
+
+  local lines = {}
+  
+  -- change in X per Y for all lines of the triangle
+  local xStepAB = (xb - xa) / (yb - ya)
+  local xStepBC = (xc - xb) / (yc - yb)
+  local xStepAC = (xc - xa) / (yc - ya)
+
+  -- starting X value for the different lines
+  -- (kind of unnecessary; these could be saved directly to the xCur variables)
+  local yDiffStart1 = (ya - yStart1)
+  local yDiffStart2 = (yb - yStart2)
+
+  local xStartAB = xa + yDiffStart1 * -xStepAB
+  local xStartBC = xb + yDiffStart2 * -xStepBC
+  local xStartAC = xa + yDiffStart1 * -xStepAC
+  
+  -- calculating the signed area of the polygon
+  local triArea = signedTriArea(xa, ya, xb, yb, xc, yc)
+  print(triArea)
+
+  local xAB = xb - xa
+  local yAB = yb - ya
+  local xAC = xc - xa
+  local yAC = yc - ya
+
+  -- U is the texture co-ordinate vector for AB
+  -- V is the texture co-ordinate vector for AC
+  local xU = t_xb - t_xa
+  local yU = t_yb - t_ya
+  local xV = t_xc - t_xa
+  local yV = t_yc - t_ya
+
+  -- when X increases by 1, how much do U and V change
+  local xStepV = yAB / (xAC * yAB - yAC * xAB)
+  local xStepU = (-xStepV * yAC) / yAB
+
+  -- when Y increases by 1, how much do U and V change
+  local yStepV = xAB / (xAB * yAC - xAC * yAB)
+  local yStepU = (-yStepV * xAC) / xAB
+
+  -- when X increases by 1, how much do the texture coordinates change
+  local xStepTx_x = xStepU * xU + xStepV * xV
+  local xStepTx_y = xStepU * yU + xStepV * yV
+
+  -- when Y increases by 1, how much do the texture coordinates change
+  local yStepTx_x = yStepU * xU + yStepV * xV
+  local yStepTx_y = yStepU * yU + yStepV * yV
+
+  if cycle == -1 then
+    printh("xStepV: " .. tostr(xStepV), "log.txt")
+    printh("xStepU: " .. tostr(xStepU), "log.txt")
+    printh("yStepV: " .. tostr(yStepV), "log.txt")
+    printh("yStepU: " .. tostr(yStepU), "log.txt")
+
+    printh("\n", "log.txt")
+
+    printh("xU: " .. tostr(xU), "log.txt")
+    printh("yU: " .. tostr(yU), "log.txt")
+    printh("xV: " .. tostr(xV), "log.txt")
+    printh("yV: " .. tostr(yV), "log.txt")
+
+    printh("\n", "log.txt")
+
+    printh("xStepTx_x: " .. tostr(xStepTx_x), "log.txt")
+    printh("xStepTx_y: " .. tostr(xStepTx_y), "log.txt")
+    printh("yStepTx_x: " .. tostr(yStepTx_x), "log.txt")
+    printh("yStepTx_y: " .. tostr(yStepTx_y), "log.txt")
+
+    printh("\n", "log.txt")
+  end
+
+
+  -- X values for the current line being rendered
+  local xStartLine
+  local xCurLine
+  local xEndLine
+
+  -- current texture coordinate values
+  local xCur_tx = t_xa + yDiffStart1 * (-yStepTx_x)
+  local yCur_tx = t_ya + yDiffStart1 * (-yStepTx_y)
+  local lastX = xa
+
+  local leftX
+  local rightX
+
+  local color = shader3(polygon.normal)
+
+  -- draw triangle
+  local drawFunc = function(ys, ye, leftLineX, rightLineX, llxStep, rlxStep)
+
+    local llx = leftLineX
+    local rlx = rightLineX
+
+    if cycle == -1 then
+      printh("xa: " .. tostr(xa), "log.txt")
+      printh("ya: " .. tostr(ya), "log.txt")
+      printh("xb: " .. tostr(xb), "log.txt")
+      printh("yb: " .. tostr(yb), "log.txt")
+      printh("xc: " .. tostr(xc), "log.txt")
+      printh("yc: " .. tostr(yc), "log.txt")
+
+      printh("\n", "log.txt")
+
+      printh("ys: " .. tostr(ys), "log.txt")
+      printh("ye: " .. tostr(ye), "log.txt")
+      printh("llx: " .. tostr(llx), "log.txt")
+      printh("rlx: " .. tostr(rlx), "log.txt")
+      printh("llxStep: " .. tostr(llxStep), "log.txt")
+      printh("rlxStep: " .. tostr(rlxStep), "log.txt")
+
+      printh("\n", "log.txt")
+    end
+
+    for y = ys, ye, -1 do
+
+      xStartLine, xCurLine = ceil(llx)
+      xEndLine = flr(rlx)
+
+      -- line(xStartLine, y, xEndLine, y)
+
+      
+      printh("xStartLine: " .. tostr(xStartLine), "log.txt")
+      printh("xEndLine: " .. tostr(xEndLine), "log.txt")
+      printh("\n", "log.txt")
+
+      if (xStartLine < xEndLine) then
+
+        xCur_tx += (xStartLine - lastX) * xStepTx_x
+        yCur_tx += (xStartLine - lastX) * xStepTx_y
+        
+        for x = xStartLine, xEndLine, 1 do
+
+          if cycle == -1 then
+            printh("x: " .. tostr(x), "log.txt")
+            printh("y: " .. tostr(y), "log.txt")
+            printh("tx_x: " .. tostr(xCur_tx), "log.txt")
+            printh("tx_y: " .. tostr(yCur_tx), "log.txt")
+            printh("\n", "log.txt")
+          end
+
+          -- pset(x, y, pget(flr(xCur_tx + 0.5),
+                          -- flr(yCur_tx + 0.5)))
+          
+          printh("got here", "log.txt")
+          pset(x, y)
+
+          xCur_tx += xStepTx_x
+          yCur_tx += xStepTx_y
+
+        end
+
+        lastX = xEndLine
+        xCur_tx += -xStepTx_x
+        yCur_tx += -xStepTx_y
+
+      end
+
+      xCur_tx += -yStepTx_x
+      yCur_tx += -yStepTx_y
+
+      llx += -llxStep
+      rlx += -rlxStep
+
+    end
+
+    leftX = llx
+    rightX = rlx
+
+  end
+
+  if (triArea > 0) then
+    -- point b is right of line AC
+    drawFunc(yStart1, yEnd1, xStartAC, xStartAB, xStepAC, xStepAB)
+    drawFunc(yStart2, yEnd2, leftX, xStartBC, xStepAC, xStepBC)
+
+  else
+    -- point b is left of line AC
+    drawFunc(yStart1, yEnd1, xStartAB, xStartAC, xStepAB, xStepAC)
+    drawFunc(yStart2, yEnd2, xStartBC, rightX, xStepBC, xStepAC)
+
+  end
+
+
+
+  ::drawPolygonEnd::
+
+end
+
+
+function draw_polygon_fast2(polygon)
+
+  local a, b, c = polygon[1], polygon[2], polygon[3]
+  local text_a, text_b, text_c = polygon[4], polygon[5], polygon[6]
+
+  if (a.y < b.y) then
+    a, b = b, a
+    text_a, text_b = text_b, text_a
+  end
+
+  if (b.y < c.y) then
+    b, c = c, b
+    text_b, text_c = text_c, text_b
+  end
+
+  if (a.y < b.y) then
+    a, b = b, a
+    text_a, text_b = text_b, text_a
+  end
+
+  local xa, ya, xb, yb, xc, yc = a.x, a.y, b.x, b.y, c.x, c.y
+  local xa_t, ya_t, xb_t, yb_t, xc_t, yc_t = text_a.x, text_a.y, text_b.x, text_b.y, text_c.x, text_c.y
+
+  local xAB = xb - xa
+  local yAB = yb - ya
+  local xAC = xc - xa
+  local yAC = yc - ya
+
+  -- U is the texture co-ordinate vector for AB
+  -- V is the texture co-ordinate vector for AC
+  local xU = xb_t - xa_t
+  local yU = yb_t - ya_t
+  local xV = xc_t - xa_t
+  local yV = yc_t - ya_t
+
+  -- when X increases by 1, how much do U and V change
+  local xStepV = yAB / (xAC * yAB - yAC * xAB)
+  local xStepU = (-xStepV * yAC) / yAB
+
+  -- when Y increases by 1, how much do U and V change
+  local yStepV = xAB / (xAB * yAC - xAC * yAB)
+  local yStepU = (-yStepV * xAC) / xAB
+
+  -- when X increases by 1, how much do the texture coordinates change
+  local xStepTx_x = xStepU * xU + xStepV * xV
+  local xStepTx_y = xStepU * yU + xStepV * yV
+
+  -- when Y increases by 1, how much do the texture coordinates change
+  local yStepTx_x = yStepU * xU + yStepV * xV
+  local yStepTx_y = yStepU * yU + yStepV * yV
+
+  local tx_x_zero = xa_t - xa * xStepTx_x - ya * yStepTx_x
+  local tx_y_zero = ya_t - xa * xStepTx_y - ya * yStepTx_y
+
+
+  local drawfunc = function(startY, endY, leftStartX, rightStartX, leftXStep, rightXStep,
+                            txz, tyz, tx_xs, tx_ys, ty_xs, ty_ys)
+
+    if endY > startY then
+      goto drawfuncend
+    end
+
+    local cumLeftX = leftStartX
+    local cumRightX = rightStartX
+
+    local lx
+    local rx
+
+    for y = startY, endY, -1 do
+
+      lx = ceil(cumLeftX)
+      rx = flr(cumRightX)
+
+      if (lx <= rx) then
+        
+        for x = lx, rx, 1 do
+          pset(x, y, sget(flr(txz + x * tx_xs + y * tx_ys + 0.5),
+                          flr(tyz + x * ty_xs + y * ty_ys + 0.5)))
+        end
+
+      end
+
+      cumLeftX += leftXStep
+      cumRightX += rightXStep
+
+    end
+
+    ::drawfuncend::
+
+  end
+
+
+  local xStepAC = (xc - xa) / (ya - yc)
+  local xStepAB = (xb - xa) / (ya - yb)
+  local xStepBC = (xc - xb) / (yb - yc)
+
+  local startY1 = flr(ya)
+  local endY1 = ceil(yb)
+  local startY2 = flr(yb)
+  local endY2 = ceil(yc)
+
+  local start1YDiff = ya - startY1
+  local start2YDiff = yb - startY2
+  local start2YDiffLong = ya - startY2
+
+  local triArea = signedTriArea(xa, ya, xb, yb, xc, yc)
+
+  local xStartAC = xa + start1YDiff * xStepAC
+  local xStartAB = xa + start1YDiff * xStepAB
+  local xStartBC = xb + start2YDiff * xStepBC
+  local xStartAC2 = xa + start2YDiffLong * xStepAC
+
+  if (triArea < 0) then
+
+    drawfunc(startY1, endY1, xStartAC, xStartAB, xStepAC, xStepAB, tx_x_zero, tx_y_zero, xStepTx_x, yStepTx_x, xStepTx_y, yStepTx_y)
+    drawfunc(startY2, endY2, xStartAC2, xStartBC, xStepAC, xStepBC, tx_x_zero, tx_y_zero, xStepTx_x, yStepTx_x, xStepTx_y, yStepTx_y)
+
+  else
+
+    drawfunc(startY1, endY1, xStartAB, xStartAC, xStepAB, xStepAC, tx_x_zero, tx_y_zero, xStepTx_x, yStepTx_x, xStepTx_y, yStepTx_y)
+    drawfunc(startY2, endY2, xStartBC, xStartAC2, xStepBC, xStepAC, tx_x_zero, tx_y_zero, xStepTx_x, yStepTx_x, xStepTx_y, yStepTx_y)
+
+  end
+
+end
+
+
+-- assumes points are in counter-clockwise order.
+function signedTriArea(xa, ya, xb, yb, xc, yc)
+
+  return ((xb - xa) * (yc - ya) - (yb - ya) * (xc - xa))
 
 end
 
@@ -359,7 +721,7 @@ function render_object(object, objectRotH, objectRotV, objectTrans)
 
   for i, v in ipairs(newlist) do
     polygon_to_relative(v)
-    draw_polygon(v)
+    draw_polygon_fast2(v)
     -- print(tostr(v.normal.x) .. ", " .. tostr(v.normal.y) .. ", " .. tostr(v.normal.z))
   end
 
