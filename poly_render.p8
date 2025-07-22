@@ -49,7 +49,7 @@ function _draw()
 
   cls()
   render_object(obj, hrotmat, vrotmat, translation)
-  print(stat(1))
+  print(tostr(flr(stat(1) * 100)) .. "% cpu load", 7)
 
 end
 

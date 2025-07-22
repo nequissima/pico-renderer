@@ -221,34 +221,33 @@ function draw_polygon_fast(polygon)
 
       if (lx <= rx) then
 
-      aWeightLx = signedTriArea(xb, yb, xc, yc, lx, y) / triArea
-      bWeightLx = signedTriArea(xc, yc, xa, ya, lx, y) / triArea
-      cWeightLx = signedTriArea(xa, ya, xb, yb, lx, y) / triArea
+        aWeightLx = signedTriArea(xb, yb, xc, yc, lx, y) / triArea
+        bWeightLx = signedTriArea(xc, yc, xa, ya, lx, y) / triArea
+        cWeightLx = signedTriArea(xa, ya, xb, yb, lx, y) / triArea
 
-      aWeightRx = signedTriArea(xb, yb, xc, yc, rx, y) / triArea
-      bWeightRx = signedTriArea(xc, yc, xa, ya, rx, y) / triArea
-      cWeightRx = signedTriArea(xa, ya, xb, yb, rx, y) / triArea
+        aWeightRx = signedTriArea(xb, yb, xc, yc, rx, y) / triArea
+        bWeightRx = signedTriArea(xc, yc, xa, ya, rx, y) / triArea
+        cWeightRx = signedTriArea(xa, ya, xb, yb, rx, y) / triArea
 
-      txxCoLeft = xa_t * aWeightLx + xb_t * bWeightLx + xc_t * cWeightLx
-      txyCoLeft = ya_t * aWeightLx + yb_t * bWeightLx + yc_t * cWeightLx
+        txxCoLeft = xa_t * aWeightLx + xb_t * bWeightLx + xc_t * cWeightLx
+        txyCoLeft = ya_t * aWeightLx + yb_t * bWeightLx + yc_t * cWeightLx
 
-      txxCoRight = xa_t * aWeightRx + xb_t * bWeightRx + xc_t * cWeightRx
-      txyCoRight = ya_t * aWeightRx + yb_t * bWeightRx + yc_t * cWeightRx
+        txxCoRight = xa_t * aWeightRx + xb_t * bWeightRx + xc_t * cWeightRx
+        txyCoRight = ya_t * aWeightRx + yb_t * bWeightRx + yc_t * cWeightRx
 
-      txStepX = (txxCoRight - txxCoLeft) / (rx - lx)
-      txStepY = (txyCoRight - txyCoLeft) / (rx - lx)
+        txStepX = (txxCoRight - txxCoLeft) / (rx - lx)
+        txStepY = (txyCoRight - txyCoLeft) / (rx - lx)
 
-      curTextureX = txxCoLeft
-      curTextureY = txyCoLeft
+        curTextureX = txxCoLeft
+        curTextureY = txyCoLeft
 
-        for x = lx, rx, 1 do
-          --pset(x, y, sget(flr(txz + x * tx_xs + y * tx_ys + 0.5),
-                          --flr(tyz + x * ty_xs + y * ty_ys + 0.5)))
+          for x = lx, rx, 1 do
 
-          pset(x, y, sget((curTextureX + 0.5) & 0xFF.00,(curTextureY + 0.5) & 0xFF.00))
-          curTextureX += txStepX
-          curTextureY += txStepY
-        end
+            pset(x, y, sget((curTextureX + 0.5) & 0xFF.00,(curTextureY + 0.5) & 0xFF.00))
+            curTextureX += txStepX
+            curTextureY += txStepY
+
+          end
 
       end
 
