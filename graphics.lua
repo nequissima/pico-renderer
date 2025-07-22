@@ -143,9 +143,11 @@ end
 
 function draw_polygon_fast(polygon)
 
+  -- moving data into local variables for faster access
   local a, b, c = polygon[1], polygon[2], polygon[3]
   local text_a, text_b, text_c = polygon[4], polygon[5], polygon[6]
 
+  -- making sure the points are in order from highest to smallest y-value
   if (a.y < b.y) then
     a, b = b, a
     text_a, text_b = text_b, text_a
@@ -161,29 +163,38 @@ function draw_polygon_fast(polygon)
     text_a, text_b = text_b, text_a
   end
 
+  -- moving data into local variables for faster access
   local xa, ya, xb, yb, xc, yc = a.x, a.y, b.x, b.y, c.x, c.y
   local xa_t, ya_t, xb_t, yb_t, xc_t, yc_t = text_a.x, text_a.y, text_b.x, text_b.y, text_c.x, text_c.y
 
+  -- the slope of the lines
   local xStepAC = (xc - xa) / (ya - yc)
   local xStepAB = (xb - xa) / (ya - yb)
   local xStepBC = (xc - xb) / (yb - yc)
 
+  -- start and end y-values for the two triangle parts
   local startY1 = flr(ya)
   local endY1 = ceil(yb)
   local startY2 = flr(yb)
   local endY2 = ceil(yc)
 
+  -- difference from the points' y-values and the integer rounded values
   local start1YDiff = ya - startY1
   local start2YDiff = yb - startY2
   local start2YDiffLong = ya - startY2
 
+  -- signed area of the whole triangle (times two, technically)
   local triArea = signedTriArea(xa, ya, xb, yb, xc, yc)
 
+  -- initial X-values for the starting y-values
   local xStartAC = xa + start1YDiff * xStepAC
   local xStartAB = xa + start1YDiff * xStepAB
   local xStartBC = xb + start2YDiff * xStepBC
   local xStartAC2 = xa + start2YDiffLong * xStepAC
 
+  -- TODO: use goto jumps to avoid a function call; it'll make the code a lot cleaner
+  -- also instead of calling the func with different args based on whether b is left or right of AC,
+  -- just swap the cumulative xy vars and the xstep vars with each other. that way it's the same call.
   local drawfunc = function(startY, endY, leftStartX, rightStartX, leftXStep, rightXStep)
 
     if endY > startY then
