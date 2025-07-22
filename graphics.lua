@@ -164,37 +164,6 @@ function draw_polygon_fast(polygon)
   local xa, ya, xb, yb, xc, yc = a.x, a.y, b.x, b.y, c.x, c.y
   local xa_t, ya_t, xb_t, yb_t, xc_t, yc_t = text_a.x, text_a.y, text_b.x, text_b.y, text_c.x, text_c.y
 
-  local xAB = xb - xa
-  local yAB = yb - ya
-  local xAC = xc - xa
-  local yAC = yc - ya
-
-  -- U is the texture co-ordinate vector for AB
-  -- V is the texture co-ordinate vector for AC
-  local xU = xb_t - xa_t
-  local yU = yb_t - ya_t
-  local xV = xc_t - xa_t
-  local yV = yc_t - ya_t
-
-  -- when X increases by 1, how much do U and V change
-  local xStepV = yAB / (xAC * yAB - yAC * xAB)
-  local xStepU = (-xStepV * yAC) / yAB
-
-  -- when Y increases by 1, how much do U and V change
-  local yStepV = xAB / (xAB * yAC - xAC * yAB)
-  local yStepU = (-yStepV * xAC) / xAB
-
-  -- when X increases by 1, how much do the texture coordinates change
-  local xStepTx_x = xStepU * xU + xStepV * xV
-  local xStepTx_y = xStepU * yU + xStepV * yV
-
-  -- when Y increases by 1, how much do the texture coordinates change
-  local yStepTx_x = yStepU * xU + yStepV * xV
-  local yStepTx_y = yStepU * yU + yStepV * yV
-
-  local tx_x_zero = xa_t - xa * xStepTx_x - ya * yStepTx_x
-  local tx_y_zero = ya_t - xa * xStepTx_y - ya * yStepTx_y
-
   local xStepAC = (xc - xa) / (ya - yc)
   local xStepAB = (xb - xa) / (ya - yb)
   local xStepBC = (xc - xb) / (yb - yc)
@@ -209,15 +178,13 @@ function draw_polygon_fast(polygon)
   local start2YDiffLong = ya - startY2
 
   local triArea = signedTriArea(xa, ya, xb, yb, xc, yc)
-  local triAreaAbs = abs(triArea)
 
   local xStartAC = xa + start1YDiff * xStepAC
   local xStartAB = xa + start1YDiff * xStepAB
   local xStartBC = xb + start2YDiff * xStepBC
   local xStartAC2 = xa + start2YDiffLong * xStepAC
 
-  local drawfunc = function(startY, endY, leftStartX, rightStartX, leftXStep, rightXStep,
-                            txz, tyz, tx_xs, tx_ys, ty_xs, ty_ys)
+  local drawfunc = function(startY, endY, leftStartX, rightStartX, leftXStep, rightXStep)
 
     if endY > startY then
       goto drawfuncend
@@ -247,12 +214,12 @@ function draw_polygon_fast(polygon)
     local curTextureX
     local curTextureY
 
-    
-
     for y = startY, endY, -1 do
 
       lx = ceil(cumLeftX)
       rx = flr(cumRightX)
+
+      if (lx <= rx) then
 
       aWeightLx = signedTriArea(xb, yb, xc, yc, lx, y) / triArea
       bWeightLx = signedTriArea(xc, yc, xa, ya, lx, y) / triArea
@@ -261,16 +228,6 @@ function draw_polygon_fast(polygon)
       aWeightRx = signedTriArea(xb, yb, xc, yc, rx, y) / triArea
       bWeightRx = signedTriArea(xc, yc, xa, ya, rx, y) / triArea
       cWeightRx = signedTriArea(xa, ya, xb, yb, rx, y) / triArea
-
-      if (cycle == 1) then
-        printh("awlx: " .. tostr(aWeightLx), "log.txt")
-        printh("bwlx: " .. tostr(bWeightLx), "log.txt")
-        printh("cwlx: " .. tostr(cWeightLx), "log.txt")
-
-        printh("awrx: " .. tostr(aWeightRx), "log.txt")
-        printh("bwrx: " .. tostr(bWeightRx), "log.txt")
-        printh("cwrx: " .. tostr(cWeightRx), "log.txt")
-      end
 
       txxCoLeft = xa_t * aWeightLx + xb_t * bWeightLx + xc_t * cWeightLx
       txyCoLeft = ya_t * aWeightLx + yb_t * bWeightLx + yc_t * cWeightLx
@@ -284,16 +241,11 @@ function draw_polygon_fast(polygon)
       curTextureX = txxCoLeft
       curTextureY = txyCoLeft
 
-      if (lx <= rx) then
-        
         for x = lx, rx, 1 do
           --pset(x, y, sget(flr(txz + x * tx_xs + y * tx_ys + 0.5),
                           --flr(tyz + x * ty_xs + y * ty_ys + 0.5)))
-          if (cycle == 1) then
-            printh("txtr x: " .. tostr(curTextureX), "log.txt")
-            printh("txtr y: " .. tostr(curTextureY), "log.txt")
-          end
-          pset(x, y, sget(flr(curTextureX + 0.5),flr(curTextureY + 0.5)))
+
+          pset(x, y, sget((curTextureX + 0.5) & 0xFF.00,(curTextureY + 0.5) & 0xFF.00))
           curTextureX += txStepX
           curTextureY += txStepY
         end
@@ -312,13 +264,13 @@ function draw_polygon_fast(polygon)
 
   if (triArea < 0) then
 
-    drawfunc(startY1, endY1, xStartAC, xStartAB, xStepAC, xStepAB, tx_x_zero, tx_y_zero, xStepTx_x, yStepTx_x, xStepTx_y, yStepTx_y)
-    drawfunc(startY2, endY2, xStartAC2, xStartBC, xStepAC, xStepBC, tx_x_zero, tx_y_zero, xStepTx_x, yStepTx_x, xStepTx_y, yStepTx_y)
+    drawfunc(startY1, endY1, xStartAC, xStartAB, xStepAC, xStepAB)
+    drawfunc(startY2, endY2, xStartAC2, xStartBC, xStepAC, xStepBC)
 
   else
 
-    drawfunc(startY1, endY1, xStartAB, xStartAC, xStepAB, xStepAC, tx_x_zero, tx_y_zero, xStepTx_x, yStepTx_x, xStepTx_y, yStepTx_y)
-    drawfunc(startY2, endY2, xStartBC, xStartAC2, xStepBC, xStepAC, tx_x_zero, tx_y_zero, xStepTx_x, yStepTx_x, xStepTx_y, yStepTx_y)
+    drawfunc(startY1, endY1, xStartAB, xStartAC, xStepAB, xStepAC)
+    drawfunc(startY2, endY2, xStartBC, xStartAC2, xStepBC, xStepAC)
 
   end
 
