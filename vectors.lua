@@ -1,5 +1,8 @@
 -- vectors and vector functions
 
+#include helper_funcs.lua
+
+
 -- making sin and cos behave like you expect them to
 p8cos = cos function cos(angle) return p8cos(angle/(3.1415*2)) end
 p8sin = sin function sin(angle) return -p8sin(angle/(3.1415*2)) end

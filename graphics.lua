@@ -1,5 +1,7 @@
 -- graphics & drawing functions
 
+#include polygon.lua
+
 function draw_polygon(polygon)
 
   -- moving data into local variables for faster access

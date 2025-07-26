@@ -5,6 +5,7 @@
 p8cos = cos function cos(angle) return p8cos(angle/(3.1415*2)) end
 p8sin = sin function sin(angle) return -p8sin(angle/(3.1415*2)) end
 
+-- Singleton constructor objects
 
 Vector3 = {}
 Vector3.mt = {}
@@ -28,8 +29,14 @@ Vector2.mt.__pow = Vector2.dot_product
 
 Matrix3x3 = {}
 Matrix3x3.mt = {}
-Matrix3x3.mt.__mul = Matrix3x3.multiply_matrix_matrix
-Matrix3x3.mt.__pow = Matrix3x3.multiply_matrix_vector
+Matrix3x3.mt.__pow = Matrix3x3.multiply_matrix_matrix
+Matrix3x3.mt.__mul = Matrix3x3.multiply_matrix_vector
+
+
+-- Global vectors
+
+cameradir = Vector3.new(0, 0, 1)
+origin = Vector3.new(0, 0, 0)
 
 
 -- 3D Vector functions
@@ -131,6 +138,20 @@ function Vector3.to_screenspace(a)
 end
 
 
+function Vector3.calculate_surface_normal(a, b, c)
+
+  return Vector3.normalize((b - a) % (c - a))
+
+end
+
+
+function Vector3.distance(a, b)
+
+  return #(b - a)
+
+end
+
+
 -- 2D Vector functions
 
 function Vector2.new(x, y, z)
@@ -138,7 +159,7 @@ function Vector2.new(x, y, z)
   local vector2 = {["x"] = x,
                    ["y"] = y}
                 
-  setmetatable(vector2, Vector3.mt)
+  setmetatable(vector2, Vector2.mt)
   return vector2
 
 end
@@ -248,5 +269,22 @@ function Matrix3x3.multiply_matrix_matrix(leftMatrix, rightMatrix)
   return Matrix3x3.new(lmRow1 ^ rmColumn1, lmRow1 ^ rmColumn2, lmRow1 ^ rmColumn3,
                        lmRow2 ^ rmColumn1, lmRow2 ^ rmColumn2, lmRow2 ^ rmColumn3,
                        lmRow3 ^ rmColumn1, lmRow3 ^ rmColumn2, lmRow3 ^ rmColumn3)
+
+end
+
+
+-- General math functions
+
+-- result is positive if points are in counter-clockwise order, negative otherwise.
+function signedTriArea(xa, ya, xb, yb, xc, yc)
+
+  return ((xb - xa) * (yc - ya) - (yb - ya) * (xc - xa))
+
+end
+
+
+function round_positive(num)
+
+  return (num + 0.5) & 0xFF.00
 
 end
