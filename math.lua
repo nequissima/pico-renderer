@@ -33,12 +33,6 @@ Matrix3x3.mt.__pow = Matrix3x3.multiply_matrix_matrix
 Matrix3x3.mt.__mul = Matrix3x3.multiply_matrix_vector
 
 
--- Global vectors
-
-cameradir = Vector3.new(0, 0, 1)
-origin = Vector3.new(0, 0, 0)
-
-
 -- 3D Vector functions
 
 function Vector3.new(x, y, z)
@@ -114,7 +108,7 @@ end
 
 function Vector3.length(a)
 
-  return sqrt(a.x * a.x, a.y * a.y, a.z * a.z)
+  return sqrt(a.x * a.x + a.y * a.y + a.z * a.z)
 
 end
 
@@ -222,6 +216,7 @@ function Matrix3x3.new(m11, m21, m31,
                      ["m13"] = m13, ["m23"] = m23, ["m33"] = m33}
 
   setmetatable(matrix3x3, Matrix3x3.mt)
+  return matrix3x3
 
 
 end

@@ -30,25 +30,25 @@ function create_cube()
   for i=1,12 do
     
     if i % 2 == 0 then
-      polyList[i] = create_3d_polygon(
-        create_vector_3d(newtable[1 + step], newtable[2 + step], newtable[3 + step]),
-        create_vector_3d(newtable[4 + step], newtable[5 + step], newtable[6 + step]),
-        create_vector_3d(newtable[7 + step], newtable[8 + step], newtable[9 + step]),
-        create_vector_2d(0,32), --DEBUG
-        create_vector_2d(31,32),
-        create_vector_2d(0,63) --DEBUG
+      polyList[i] = Polygon.new(
+        Vector3.new(newtable[1 + step], newtable[2 + step], newtable[3 + step]),
+        Vector3.new(newtable[4 + step], newtable[5 + step], newtable[6 + step]),
+        Vector3.new(newtable[7 + step], newtable[8 + step], newtable[9 + step]),
+        Vector2.new(0,32), --DEBUG
+        Vector2.new(31,32),
+        Vector2.new(0,63) --DEBUG
         
       )
       step += 9
     else
 
-      polyList[i] = create_3d_polygon(
-      create_vector_3d(newtable[1 + step], newtable[2 + step], newtable[3 + step]),
-      create_vector_3d(newtable[4 + step], newtable[5 + step], newtable[6 + step]),
-      create_vector_3d(newtable[7 + step], newtable[8 + step], newtable[9 + step]),
-      create_vector_2d(31,63), --DEBUG
-      create_vector_2d(0,63),
-      create_vector_2d(31,32) --DEBUG
+      polyList[i] = Polygon.new(
+      Vector3.new(newtable[1 + step], newtable[2 + step], newtable[3 + step]),
+      Vector3.new(newtable[4 + step], newtable[5 + step], newtable[6 + step]),
+      Vector3.new(newtable[7 + step], newtable[8 + step], newtable[9 + step]),
+      Vector2.new(31,63), --DEBUG
+      Vector2.new(0,63),
+      Vector2.new(31,32) --DEBUG
       
     )
     step += 9
@@ -58,7 +58,7 @@ function create_cube()
 
   end
 
-  return create_object(polyList, create_vector_3d(0,0,0))
+  return Polygon.create_object(polyList, Vector3.new(0,0,0))
 
 end
 
@@ -109,7 +109,7 @@ function create_icosahedron()
   local step = 0
   for i=1,12 do
 
-    vectorlist[i] = create_vector_3d(vertexlist[1+step], vertexlist[2+step], vertexlist[3+step])
+    vectorlist[i] = Vector3.new(vertexlist[1+step], vertexlist[2+step], vertexlist[3+step])
     step += 3
 
   end
@@ -117,30 +117,30 @@ function create_icosahedron()
   local cpoint = vectorlist[1]
 
   for i = 2, 12, 1 do
-    cpoint = add_vectors(cpoint, vectorlist[i])
+    cpoint = cpoint + vectorlist[i]
   end
 
-  cpoint = multiply_vector_3d(cpoint, 1/12)
+  cpoint = cpoint * (1/12)
 
   for i = 1, 12, 1 do
-    vectorlist[i] = sub_vectors(vectorlist[i], cpoint)
+    vectorlist[i] = vectorlist[i] - cpoint
   end
 
   step = 0
   for i=1,20 do
 
-    polylist[i] = create_3d_polygon(
+    polylist[i] = Polygon.new(
       vectorlist[facelist[1+step]],
       vectorlist[facelist[2+step]],
       vectorlist[facelist[3+step]],
-      create_vector_2d(96,0), --DEBUG
-      create_vector_2d(111,31),
-      create_vector_2d(80,31)
+      Vector2.new(96,0), --DEBUG
+      Vector2.new(111,31),
+      Vector2.new(80,31)
     )
     step += 3
 
   end
 
-  return create_object(polylist, create_vector_3d(0,0,0))
+  return Polygon.create_object(polylist, Vector3.new(0,0,0))
 
 end
