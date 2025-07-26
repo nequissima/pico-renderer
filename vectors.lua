@@ -171,7 +171,6 @@ end
 
 
 -- takes a 3d vector and normalizes it
--- this is slow. big PERFORMANCE gains to be found by optimizing this. (maybe use the Quake 3 fast inverse sqrt?) 
 function normalize_3d_vector(vector)
 
   local factor = 1 / sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z)
