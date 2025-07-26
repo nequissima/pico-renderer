@@ -6,31 +6,36 @@ p8cos = cos function cos(angle) return p8cos(angle/(3.1415*2)) end
 p8sin = sin function sin(angle) return -p8sin(angle/(3.1415*2)) end
 
 -- Singleton constructor objects
-
 Vector3 = {}
 Vector3.mt = {}
-Vector3.mt.__add = Vector3.add
-Vector3.mt.__sub = Vector3.subtract
-Vector3.mt.__mul = Vector3.multiply_constant
-Vector3.mt.__div = Vector3.divide_constant
-Vector3.mt.__pow = Vector3.dot_product
-Vector3.mt.__mod = Vector3.cross_product
-Vector3.mt.__len = Vector3.length
-
 
 Vector2 = {}
 Vector2.mt = {}
-Vector2.mt.__add = Vector2.add
-Vector2.mt.__sub = Vector2.subtract
-Vector2.mt.__mul = Vector2.multiply_constant
-Vector2.mt.__div = Vector2.divide_constant
-Vector2.mt.__pow = Vector2.dot_product
-
 
 Matrix3x3 = {}
 Matrix3x3.mt = {}
-Matrix3x3.mt.__pow = Matrix3x3.multiply_matrix_matrix
-Matrix3x3.mt.__mul = Matrix3x3.multiply_matrix_vector
+
+-- I don't know why I have to do this like this, but I do, or PICO-8 throws a fit.
+function init_metatables()
+  
+  Vector3.mt.__add = Vector3.add
+  Vector3.mt.__sub = Vector3.subtract
+  Vector3.mt.__mul = Vector3.multiply_constant
+  Vector3.mt.__div = Vector3.divide_constant
+  Vector3.mt.__pow = Vector3.dot_product
+  Vector3.mt.__mod = Vector3.cross_product
+  Vector3.mt.__len = Vector3.length
+
+  Vector2.mt.__add = Vector2.add
+  Vector2.mt.__sub = Vector2.subtract
+  Vector2.mt.__mul = Vector2.multiply_constant
+  Vector2.mt.__div = Vector2.divide_constant
+  Vector2.mt.__pow = Vector2.dot_product
+
+  Matrix3x3.mt.__pow = Matrix3x3.multiply_matrix_matrix
+  Matrix3x3.mt.__mul = Matrix3x3.multiply_matrix_vector
+
+end
 
 
 -- 3D Vector functions

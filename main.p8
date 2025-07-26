@@ -16,26 +16,10 @@ cycle = 0 -- DEBUG
 function _init()
 
   -- Global vectors
+  init_metatables()
 
   cameradir = Vector3.new(0, 0, 1)
   origin = Vector3.new(0, 0, 0)
-
-  Vector3.mt.__add = Vector3.add
-  Vector3.mt.__sub = Vector3.subtract
-  Vector3.mt.__mul = Vector3.multiply_constant
-  Vector3.mt.__div = Vector3.divide_constant
-  Vector3.mt.__pow = Vector3.dot_product
-  Vector3.mt.__mod = Vector3.cross_product
-  Vector3.mt.__len = Vector3.length
-
-  Vector2.mt.__add = Vector2.add
-  Vector2.mt.__sub = Vector2.subtract
-  Vector2.mt.__mul = Vector2.multiply_constant
-  Vector2.mt.__div = Vector2.divide_constant
-  Vector2.mt.__pow = Vector2.dot_product
-
-  Matrix3x3.mt.__pow = Matrix3x3.multiply_matrix_matrix
-  Matrix3x3.mt.__mul = Matrix3x3.multiply_matrix_vector
 
   -- yes i'm aware horizontal and vertical are not the right terms to use here but
   -- you get what i mean here
